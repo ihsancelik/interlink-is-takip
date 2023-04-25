@@ -8,10 +8,7 @@ app.use(express.static(__dirname + '/uploads'));
 
 // if not exist __dirname + '/uploads' folder, create it'
 const fs = require('fs');
-if (!fs.existsSync(__dirname + '/uploads')) {
-    fs.mkdirSync(__dirname + '/uploads');
-}
-
+if (!fs.existsSync(__dirname + '/uploads')) fs.mkdirSync(__dirname + '/uploads');
 
 const authenticationController = require('./controllers/authentication-controller');
 const departmentController = require('./controllers/department-controller');
