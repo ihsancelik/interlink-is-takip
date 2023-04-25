@@ -38,11 +38,19 @@ const fileSchema = new Mongoose.Schema({
     created_at: { type: Date, default: Date.now }
 })
 
+const activityLogSchema = new Mongoose.Schema({
+    task_id: { type: Mongoose.Schema.Types.ObjectId, ref: 'Task' },
+    user_id: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
+    message: { type: String, required: true },
+    created_at: { type: Date, default: Date.now }
+})
+
 const Department = Mongoose.model('Department', departmentSchema);
 const User = Mongoose.model('User', userSchema);
 const Task = Mongoose.model('Task', taskSchema);
 const Conversation = Mongoose.model('Conversation', conversationSchema);
 const File = Mongoose.model('File', fileSchema);
+const ActivityLog = Mongoose.model('ActivityLog', activityLogSchema);
 
 Mongoose.connect("mongodb://localhost:27017/istakipdb")
     .then(() => {
@@ -83,4 +91,5 @@ module.exports = {
     Task,
     Conversation,
     File,
+    ActivityLog
 };
