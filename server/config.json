@@ -1,0 +1,6 @@
+{
+    "jwt": {
+        "secret-key": "sdgdsgsgsdgsgsgdsdgsdgdsgsdgsdgddgsgsdsgdssgdsggsdss",
+        "expires-in": "9999d"
+    }
+}
