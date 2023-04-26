@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { User } = require('../db');
-const { generateToken } = require('../token-generator');
+const { generateToken } = require('../services/token-service');
 
 
 router.post('/login', async (req, res) => {

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const config = require('./config.json');
+const config = require('../config.json');
 
 const secretKey = config.jwt['secret-key'];
 const expiresIn = config.jwt['expires-in'];
@@ -15,6 +15,17 @@ function generateToken(department_id, department_name, user_id, full_name, usern
     return token;
 }
 
+function decodeToken(token) {
+    try {
+        const decoded = jwt.verify(token, privateKey);
+        return decoded;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
 module.exports = {
-    generateToken
+    generateToken,
+    decodeToken
 }
