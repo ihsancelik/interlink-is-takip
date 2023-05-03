@@ -18,7 +18,7 @@ router.post('/login', async (req, res) => {
             const savedUser = await user.save();
             user = savedUser;
         }
-
+        user.password = undefined;
         res.json(user);
     } catch (err) {
         console.error(err);
