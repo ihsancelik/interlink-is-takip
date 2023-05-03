@@ -25,7 +25,22 @@ function decodeToken(token) {
     }
 }
 
+function getTokenClaims(token) {
+    const decoded = decodeToken(token);
+    if (decoded) {
+        return {
+            department_id: decoded.department_id,
+            department_name: decoded.department_name,
+            user_id: decoded.user_id,
+            full_name: decoded.full_name,
+            username: decoded.username
+        };
+    } else {
+        return null;
+    }
+}
+
 module.exports = {
     generateToken,
-    decodeToken
+    getTokenClaims
 }
