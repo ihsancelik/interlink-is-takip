@@ -1,5 +1,9 @@
 const Mongoose = require('mongoose');
 
+const projectSchema = new Mongoose.Schema({
+    name: { type: String, required: true, unique: true }
+});
+
 const departmentSchema = new Mongoose.Schema({
     name: {
         type: String,
@@ -17,7 +21,7 @@ const userSchema = new Mongoose.Schema({
     role: { type: Mongoose.Schema.Types.ObjectId, ref: 'UserRole' },
 });
 
-const userRole = new Mongoose.Schema({
+const userRoleSchema = new Mongoose.Schema({
     name: { type: String, required: true, unique: true }
 })
 
@@ -60,9 +64,10 @@ const activityLogSchema = new Mongoose.Schema({
     created_at: { type: Date, default: Date.now }
 })
 
+const Project = Mongoose.model('Project', projectSchema);
 const Department = Mongoose.model('Department', departmentSchema);
 const User = Mongoose.model('User', userSchema);
-const UserRole = Mongoose.model('UserRole', userRole);
+const UserRole = Mongoose.model('UserRole', userRoleSchema);
 const Task = Mongoose.model('Task', taskSchema);
 const TaskStatus = Mongoose.model('TaskStatus', taskStatusSchema);
 const TaskPriority = Mongoose.model('TaskPriority', taskPrioritySchema);
@@ -88,7 +93,7 @@ async function checkStaticDatas() {
         const newDepartment = new Department({
             name: "yazılım"
         });
-        department = newDepartment.save();
+        department = await newDepartment.save();
     }
 
     const userRoles = ["admin", "yönetici", "kullanıcı"];
@@ -96,10 +101,10 @@ async function checkStaticDatas() {
     for (let i = 0; i < userRoles.length; i++) {
         const role = userRoles[i];
         if (!userRoleList.find(x => x.name == role)) {
-            const newUserRole = new UserRole({
+            const newUserRole = await new UserRole({
                 name: role
-            });
-            newUserRole.save();
+            }).save();
+            console.log(newUserRole);
         }
     }
 
@@ -113,7 +118,7 @@ async function checkStaticDatas() {
             department: department._id,
             role: adminRole._id
         });
-        newUser.save();
+        await newUser.save();
     }
 
     const managerRole = await UserRole.findOne({ name: "yönetici" });
@@ -126,7 +131,7 @@ async function checkStaticDatas() {
             department: department._id,
             role: managerRole._id
         });
-        newUser.save();
+        await newUser.save();
     }
 
     const defaultStatusList = ["beklemede", "devam ediyor", "tamamlandı", "iptal edildi"];
@@ -137,7 +142,7 @@ async function checkStaticDatas() {
             const newTaskStatus = new TaskStatus({
                 name: status
             });
-            newTaskStatus.save();
+            await newTaskStatus.save();
         }
     }
 
@@ -149,12 +154,13 @@ async function checkStaticDatas() {
             const newTaskPriority = new TaskPriority({
                 name: priority
             });
-            newTaskPriority.save();
+            await newTaskPriority.save();
         }
     }
 }
 
 module.exports = {
+    Project,
     Department,
     User,
     UserRole,
