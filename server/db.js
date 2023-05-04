@@ -25,6 +25,10 @@ const userRoleSchema = new Mongoose.Schema({
     name: { type: String, required: true, unique: true }
 })
 
+const taskTypeSchema = new Mongoose.Schema({
+    name: { type: String, required: true, unique: true }
+})
+
 const taskStatusSchema = new Mongoose.Schema({
     name: { type: String, required: true, unique: true }
 });
@@ -36,6 +40,7 @@ const taskPrioritySchema = new Mongoose.Schema({
 const taskSchema = new Mongoose.Schema({
     title: { type: String, required: false },
     description: { type: String, required: false },
+    type: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskType' },
     status: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskStatus' },
     priority: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskPriority' },
     created_from_id: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -71,6 +76,7 @@ const UserRole = Mongoose.model('UserRole', userRoleSchema);
 const Task = Mongoose.model('Task', taskSchema);
 const TaskStatus = Mongoose.model('TaskStatus', taskStatusSchema);
 const TaskPriority = Mongoose.model('TaskPriority', taskPrioritySchema);
+const TaskType = Mongoose.model('TaskType', taskTypeSchema);
 const Conversation = Mongoose.model('Conversation', conversationSchema);
 const File = Mongoose.model('File', fileSchema);
 const ActivityLog = Mongoose.model('ActivityLog', activityLogSchema);
@@ -88,7 +94,7 @@ checkStaticDatas();
 
 
 async function checkStaticDatas() {
-    const department = await Department.findOne({ name: "yazılım" });
+    let department = await Department.findOne({ name: "yazılım" });
     if (!department) {
         const newDepartment = new Department({
             name: "yazılım"
@@ -134,6 +140,18 @@ async function checkStaticDatas() {
         await newUser.save();
     }
 
+    const defaultTaskTypes = ["istek", "öneri", "sistem hatası", "diğer"];
+    const taskTypeList = await TaskType.find();
+    for (let i = 0; i < taskTypeList.length; i++) {
+        const taskType = defaultTaskTypes[i];
+        if (!taskTypeList.find(x => x.name == taskType)) {
+            const newTaskType = new TaskType({
+                name: taskType
+            });
+            await newTaskType.save();
+        }
+    }
+
     const defaultStatusList = ["beklemede", "devam ediyor", "tamamlandı", "iptal edildi"];
     const taskStatusList = await TaskStatus.find();
     for (let i = 0; i < defaultStatusList.length; i++) {
@@ -167,6 +185,7 @@ module.exports = {
     Task,
     TaskStatus,
     TaskPriority,
+    TaskType,
     Conversation,
     File,
     ActivityLog

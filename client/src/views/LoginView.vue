@@ -25,6 +25,11 @@ export default {
                 alert("Kullanıcı adı veya şifre hatalı!");
             });
         }
+    },
+    computed: {
+        isAuthenticated() {
+            return this.$store.getters.isAuthenticated;
+        }
     }
 }
 </script>

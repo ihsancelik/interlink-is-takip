@@ -12,12 +12,11 @@ router.post('/login', async (req, res) => {
         if (!user)
             return res.status(404).json({ message: 'User not found' });
 
-        if (!user.token) {
-            const token = generateToken(user);
-            user.token = token;
-            const savedUser = await user.save();
-            user = savedUser;
-        }
+        const token = generateToken(user);
+        user.token = token;
+        const savedUser = await user.save();
+        user = savedUser;
+
         user.password = undefined;
         res.json(user);
     } catch (err) {

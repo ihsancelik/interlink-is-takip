@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { Department, User } = require('../db');
+const { Department, User, UserRole } = require('../db');
 
 
 router.get('/users', async (req, res) => {
     try {
-        const users = await User.find().populate('department');
+        const users = await User.find().populate('department').populate('role');
         res.json(users);
     } catch (err) {
         console.error(err);
@@ -15,7 +15,7 @@ router.get('/users', async (req, res) => {
 
 router.post('/users', async (req, res) => {
     try {
-        const { full_name, username, password, departmentid } = req.body;
+        const { full_name, username, password, departmentid, roleid } = req.body.data;
 
         // Check if the department exists
         const existingDepartment = await Department.findById(departmentid);
@@ -23,11 +23,17 @@ router.post('/users', async (req, res) => {
             return res.status(400).json({ message: 'Department not found' });
         }
 
+        const existingRole = await UserRole.findById(roleid);
+        if (!existingRole) {
+            return res.status(400).json({ message: 'Role not found' });
+        }
+
         const user = new User({
             full_name,
             username,
             password,
-            department: existingDepartment._id
+            department: existingDepartment._id,
+            role: existingRole._id
         });
 
         const savedUser = await user.save();
