@@ -5,7 +5,14 @@ const { Task } = require('../db');
 //task list
 router.get('/tasks', async (req, res) => {
     try {
-        const tasks = await Task.find();
+        const tasks = await Task.find()
+            .populate('related_person')
+            .populate('related_department')
+            .populate('type')
+            .populate('status')
+            .populate('priority')
+            .populate('created_from')
+
         res.json(tasks);
     } catch (err) {
         console.error(err);
@@ -15,8 +22,8 @@ router.get('/tasks', async (req, res) => {
 
 router.post('/tasks', async (req, res) => {
     try {
-        const { name, description, departmentId } = req.body;
-        const task = new Task({ name, description, departmentId });
+        const { title, description, related_person, related_department, type, status, priority, created_from } = req.body;
+        const task = new Task({ title, description, related_person, related_department, type, status, priority, created_from });
         const savedTask = await task.save();
         res.status(201).json(savedTask);
     } catch (err) {
@@ -26,12 +33,12 @@ router.post('/tasks', async (req, res) => {
 });
 
 router.put('/tasks/:id', async (req, res) => {
-    const { title, description } = req.body;
-    const { id } = req.params;
+    const { taskId } = req.params.taskId;
+    const { title, description, related_person, related_department, type, status, priority, created_from } = req.body;
     try {
         const updatedTask = await Task.findByIdAndUpdate(
-            id,
-            { title, description },
+            taskId,
+            { title, description, related_person, related_department, type, status, priority, created_from },
             { new: true }
         );
         if (!updatedTask) {
@@ -58,3 +65,5 @@ router.delete('/tasks/:id', async (req, res) => {
         res.status(500).json({ message: 'Could not delete task' });
     }
 });
+
+module.exports = router;

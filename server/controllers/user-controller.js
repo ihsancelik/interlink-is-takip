@@ -47,7 +47,7 @@ router.post('/users', async (req, res) => {
 router.put('/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
-        const { full_name, username, password, department, token } = req.body;
+        const { full_name, username, password, departmentid, roleid } = req.body.data;
 
         // Check if the user exists
         let existingUser = await User.findById(userId);
@@ -55,27 +55,23 @@ router.put('/users/:id', async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Update user properties only if the value is not null
-        if (token !== null) {
-            existingUser.token = token;
+
+        // Check if the department exists
+        const existingDepartment = await Department.findById(departmentid);
+        if (!existingDepartment) {
+            return res.status(400).json({ message: 'Department not found' });
         }
-        if (full_name !== null) {
-            existingUser.full_name = full_name;
+
+        const existingRole = await UserRole.findById(roleid);
+        if (!existingRole) {
+            return res.status(400).json({ message: 'Role not found' });
         }
-        if (username !== null) {
-            existingUser.username = username;
-        }
-        if (password !== null) {
-            existingUser.password = password;
-        }
-        if (department !== null) {
-            // Check if the department exists
-            const existingDepartment = await Department.findById(department);
-            if (!existingDepartment) {
-                return res.status(400).json({ message: 'Department not found' });
-            }
-            existingUser.department = existingDepartment._id;
-        }
+
+        existingUser.full_name = full_name;
+        existingUser.username = username;
+        existingUser.password = password;
+        existingUser.department = existingDepartment._id;
+        existingUser.role = existingRole._id;
 
         const updatedUser = await existingUser.save();
         res.json(updatedUser);
@@ -88,6 +84,7 @@ router.put('/users/:id', async (req, res) => {
 router.delete('/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
+
         const deletedUser = await User.findByIdAndDelete(userId);
         if (!deletedUser) {
             return res.status(404).json({ message: 'User not found' });

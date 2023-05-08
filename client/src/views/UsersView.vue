@@ -2,11 +2,29 @@
     <div class="container">
         <h1>Kullanıcılar</h1>
         <button @click="newUser" class="btn btn-success">Yeni Kullanıcı</button>
-        <DataTable :columns="columns" :data="getUsers">
-            <template #Duzenle="slotProps">
-                <button class="btn btn-primary">Düzenle</button>
-            </template>
-        </DataTable>
+        <table>
+            <thead>
+                <tr>
+                    <th>İsim Soyisim</th>
+                    <th>Kullanıcı Adı</th>
+                    <th>Şifre</th>
+                    <th>Departman</th>
+                    <th>Rol</th>
+                    <th>Aksiyonlar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="user in getUsers" :key="user._id">
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.password }}</td>
+                    <td>{{ user.department.name }}</td>
+                    <td>{{ user.role.name }}</td>
+                    <td><button @click="editUser(user)" class="btn btn-primary">Düzenle</button></td>
+                    <td><button @click="deleteUser(user._id)" class="btn btn-danger">Sil</button></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
     
         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -16,7 +34,7 @@
                 <h5 class="modal-title" id="exampleModalLabel">Yeni Kullanıcı</h5>
               </div>
               <div class="modal-body">
-                    <CreateEditUserComponent></CreateEditUserComponent>
+                    <CreateEditUserComponent :selectedUser="selectedUser"></CreateEditUserComponent>
               </div>
             </div>
           </div>
@@ -24,7 +42,6 @@
 </template>
 
 <script>
-import DataTable from 'datatables.net-vue3';
 import { mapGetters } from 'vuex'
 import CreateEditUserComponent from '../components/users/CreateEditUser.vue'
 export default {
@@ -36,28 +53,29 @@ export default {
     },
     data() {
         return {
-            columns: [
-                { data: "full_name", title: "İsim Soyisim" },
-                { data: "username", title: "Kullanıcı Adı" },
-                { data: "password", title: "Şifre" },
-                { data: "department.name", title: "Departman" },
-                { data: "role.name", title: "Rol" },
-                { title: "Duzenle", render: function () { return "" } }],
             users: [],
+            selectedUser: null
         }
     },
     components: {
-        DataTable,
         CreateEditUserComponent
     },
     methods: {
         newUser() {
             $('#exampleModal').modal('show')
         },
+        editUser(user) {
+            this.selectedUser = user;
+            $('#exampleModal').modal('show')
+        },
+        deleteUser(userId) {
+            if (confirm("Silmek istediğinize emin misiniz?")) {
+                console.log(userId);
+                this.$store.dispatch("delete_user", { userId });
+            }
+        }
     },
 }
 </script>
 
-<style>
-@import 'datatables.net-dt';
-</style>
+<style></style>

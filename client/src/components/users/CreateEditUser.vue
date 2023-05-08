@@ -38,6 +38,23 @@
 <script>
 import { mapGetters } from 'vuex'
 export default {
+    props: {
+        selectedUser: {
+            type: Object,
+            default: null
+        }
+    },
+    watch: {
+        selectedUser: function (val) {
+            if (val != null) {
+                this.full_name = val.full_name;
+                this.username = val.username;
+                this.password = val.password;
+                this.departmentid = val.department._id;
+                this.roleid = val.role._id;
+            }
+        }
+    },
     mounted() {
         this.$store.dispatch("departments");
         this.$store.dispatch("roles");
@@ -56,28 +73,39 @@ export default {
     },
     methods: {
         save() {
-
             if (this.full_name == "" || this.username == "" || this.password == "" || this.departmentid == -1 || this.roleid == -1) {
                 alert("Lütfen tüm alanları doldurunuz!");
                 return;
             }
 
-            this.$store.dispatch("create_user", {
-                full_name: this.full_name,
-                username: this.username,
-                password: this.password,
-                departmentid: this.departmentid,
-                roleid: this.roleid
-            }).then(() => {
-                this.$router.push("/users");
-                this.full_name = "";
-                this.username = "";
-                this.password = "";
-                this.departmentid = -1;
-                this.roleid = -1;
-            }).catch((err) => {
-                alert("Kullanıcı oluşturulamadı!\n" + err);
-            });
+            if (this.selectedUser === null) {
+                this.$store.dispatch("create_user", {
+                    full_name: this.full_name,
+                    username: this.username,
+                    password: this.password,
+                    departmentid: this.departmentid,
+                    roleid: this.roleid
+                }).then(() => {
+                    $('#exampleModal').modal('hide')
+                }).catch((err) => {
+                    alert("Kullanıcı oluşturulamadı!\n" + err);
+                });
+            }
+            else {
+                this.$store.dispatch("edit_user", {
+                    userId: this.selectedUser._id,
+                    full_name: this.full_name,
+                    username: this.username,
+                    password: this.password,
+                    departmentid: this.departmentid,
+                    roleid: this.roleid
+                }).then(() => {
+                    $('#exampleModal').modal('hide')
+                }).catch((err) => {
+                    alert("Kullanıcı oluşturulamadı!\n" + err);
+                });
+            }
+
         }
     }
 }

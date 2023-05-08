@@ -40,10 +40,12 @@ const taskPrioritySchema = new Mongoose.Schema({
 const taskSchema = new Mongoose.Schema({
     title: { type: String, required: false },
     description: { type: String, required: false },
+    related_person: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
+    related_department: { type: Mongoose.Schema.Types.ObjectId, ref: 'Department' },
     type: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskType' },
     status: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskStatus' },
     priority: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskPriority' },
-    created_from_id: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
+    created_from: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
     created_at: { type: Date, default: Date.now }
 })
 
