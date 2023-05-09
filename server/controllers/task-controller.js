@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Task } = require('../db');
+const { getUserId } = require('../services/token-service')
 
 //task list
 router.get('/tasks', async (req, res) => {
@@ -22,7 +23,8 @@ router.get('/tasks', async (req, res) => {
 
 router.post('/tasks', async (req, res) => {
     try {
-        const { title, description, related_person, related_department, type, status, priority, created_from } = req.body;
+        const { title, description, related_person, related_department, type, status, priority } = req.body.data;
+        const created_from = getUserId(req);
         const task = new Task({ title, description, related_person, related_department, type, status, priority, created_from });
         const savedTask = await task.save();
         res.status(201).json(savedTask);
@@ -34,11 +36,11 @@ router.post('/tasks', async (req, res) => {
 
 router.put('/tasks/:id', async (req, res) => {
     const { taskId } = req.params.taskId;
-    const { title, description, related_person, related_department, type, status, priority, created_from } = req.body;
+    const { title, description, related_person, related_department, type, status, priority } = req.body.data;
     try {
         const updatedTask = await Task.findByIdAndUpdate(
             taskId,
-            { title, description, related_person, related_department, type, status, priority, created_from },
+            { title, description, related_person, related_department, type, status, priority },
             { new: true }
         );
         if (!updatedTask) {

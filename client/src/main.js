@@ -19,7 +19,9 @@ const store = new createStore({
         tasks: null,
         taskTypes: null,
         taskStatuses: null,
-        taskPriorities: null
+        taskPriorities: null,
+        conversations: null,
+        departmentManager: null
     },
     mutations: {
         setUser(state, user) {
@@ -46,7 +48,15 @@ const store = new createStore({
         },
         setTaskPriorities(state, taskPriorities) {
             state.taskPriorities = taskPriorities
+        },
+        setConversations(state, conversations) {
+            state.conversations = conversations
+        },
+        setDepartmentManager(state, departmentManager) {
+            state.departmentManager = departmentManager
+            console.log('setDepartmentManager')
         }
+
     },
     actions: {
         async login({ commit }, { username, password }) {
@@ -232,12 +242,12 @@ const store = new createStore({
                 return false;
             }
         },
-        async create_task({ commit }, { title, description, related_person, related_department, type, status, priority, created_from }) {
+        async create_task({ commit }, { title, description, related_person, related_department, type, status, priority }) {
             try {
                 const token = JSON.parse(this.state.user).token;
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-                const data = { full_name, username, password, departmentid, roleid }
+                const data = { title, description, related_person, related_department, type, status, priority }
                 console.log(data)
 
                 await axios.post('http://localhost:3000/tasks',
@@ -251,12 +261,12 @@ const store = new createStore({
                 throw error;
             }
         },
-        async edit_task({ commit }, { taskId, title, description, related_person, related_department, type, status, priority, created_from }) {
+        async edit_task({ commit }, { taskId, title, description, related_person, related_department, type, status, priority }) {
             try {
                 const token = JSON.parse(this.state.user).token;
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-                const data = { full_name, username, password, departmentid, roleid }
+                const data = { title, description, related_person, related_department, type, status, priority }
                 console.log(data)
 
                 await axios.put('http://localhost:3000/tasks/' + taskId,
@@ -286,6 +296,40 @@ const store = new createStore({
                 throw error;
             }
         },
+
+
+        async conversations({ commit }, { taskId }) {
+            try {
+                const token = JSON.parse(this.state.user).token;
+                const conversations = await axios.get('http://localhost:3000/conversations/' + taskId, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                commit('setConversations', conversations.data);
+                return true;
+            } catch (error) {
+                console.error(error);
+                return false;
+            }
+        },
+        async department_manager({ commit }, { departmentId }) {
+            try {
+                const token = JSON.parse(this.state.user).token;
+                const departmentManager = await axios.get('http://localhost:3000/departments/manager/' + departmentId, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                commit('setDepartmentManager', departmentManager.data);
+                return true;
+            } catch (error) {
+                console.error(error);
+                return false;
+            }
+        },
     },
     getters: {
         isAuthenticated(state) {
@@ -311,6 +355,13 @@ const store = new createStore({
         },
         getTaskPriorities(state) {
             return state.taskPriorities
+        },
+        getConversations(state) {
+            return state.conversations
+        },
+        getDepartmentManager(state) {
+            console.log('getDepartmentManager')
+            return state.departmentManager
         }
     }
 });

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Department } = require('../db');
+const { Department, User, UserRole } = require('../db');
 
 //department list
 router.get('/departments', async (req, res) => {
@@ -10,6 +10,18 @@ router.get('/departments', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Could not get departments' });
+    }
+});
+
+router.get('/departments/manager/:departmentId', async (req, res) => {
+    try {
+        const departmentId = req.params.departmentId;
+        const managerRole = await UserRole.findOne({ name: 'yönetici' });
+        const user = await User.findOne({ department: departmentId, role: managerRole._id });
+        res.json(user);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Could not get department manager' });
     }
 });
 

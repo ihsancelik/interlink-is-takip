@@ -6,9 +6,14 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 //conversation list
-router.get('/conversations', async (req, res) => {
+router.get('/conversations/:taskId', async (req, res) => {
     try {
-        const conversations = await Conversation.find()
+        const task_id = req.params.taskId;
+        const conversations = await Conversation.find({ task: task_id })
+            .populate('task')
+            .populate('created_from')
+            .populate('files')
+
         res.json(conversations)
     } catch (err) {
         console.error(err)
@@ -101,3 +106,6 @@ router.delete('/conversations/:id', async (req, res) => {
         res.status(500).json({ message: 'Could not delete conversation' })
     }
 });
+
+
+module.exports = router;

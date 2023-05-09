@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../db');
+const { User, Department } = require('../db');
 const { generateToken } = require('../services/token-service');
 
 
@@ -12,7 +12,8 @@ router.post('/login', async (req, res) => {
         if (!user)
             return res.status(404).json({ message: 'User not found' });
 
-        const token = generateToken(user);
+        const department = Department.findById(user.department);
+        const token = generateToken(department._id, department.name, user._id, user.full_name, user.username);
         user.token = token;
         const savedUser = await user.save();
         user = savedUser;

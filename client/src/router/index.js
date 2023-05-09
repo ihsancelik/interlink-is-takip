@@ -30,6 +30,11 @@ const router = createRouter({
       path: '/tasks',
       name: 'tasks',
       component: () => import('../views/TasksView.vue')
+    },
+    {
+      path: '/conversations/:taskId',
+      name: 'conversations',
+      component: () => import('../views/ConversationsView.vue')
     }
   ]
 })

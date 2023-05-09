@@ -112,11 +112,11 @@ export default {
                 this.$store.dispatch("create_task", {
                     title: this.title,
                     description: this.description,
-                    type_id: this.type_id,
-                    status_id: this.status_id,
-                    priority_id: this.priority_id,
-                    related_person_id: this.related_person_id,
-                    related_department_id: this.related_department_id
+                    type: this.type_id,
+                    status: this.status_id,
+                    priority: this.priority_id,
+                    related_person: this.related_person_id,
+                    related_department: this.related_department_id
                 }).then(() => {
                     $('#exampleModal').modal('hide')
                 }).catch((err) => {
@@ -128,11 +128,11 @@ export default {
                     taskId: this.selectedTask._id,
                     title: this.title,
                     description: this.description,
-                    type_id: this.type_id,
-                    status_id: this.status_id,
-                    priority_id: this.priority_id,
-                    related_person_id: this.related_person_id,
-                    related_department_id: this.related_department_id
+                    type: this.type_id,
+                    status: this.status_id,
+                    priority: this.priority_id,
+                    related_person: this.related_person_id,
+                    related_department: this.related_department_id
                 }).then(() => {
                     $('#exampleModal').modal('hide')
                 }).catch((err) => {

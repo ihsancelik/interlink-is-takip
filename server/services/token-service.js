@@ -6,9 +6,9 @@ const expiresIn = config.jwt['expires-in'];
 
 function generateToken(department_id, department_name, user_id, full_name, username) {
     const token = jwt.sign({
+        user_id: user_id,
         department_id: department_id,
         department_name: department_name,
-        user_id: user_id,
         full_name: full_name,
         username: username
     }, secretKey, { expiresIn: expiresIn });
@@ -17,7 +17,8 @@ function generateToken(department_id, department_name, user_id, full_name, usern
 
 function decodeToken(token) {
     try {
-        const decoded = jwt.verify(token, privateKey);
+        const decoded = jwt.verify(token, secretKey);
+        console.log(decoded);
         return decoded;
     } catch (error) {
         console.error(error);
@@ -40,7 +41,18 @@ function getTokenClaims(token) {
     }
 }
 
+function getUserId(req) {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = decodeToken(token);
+    if (decoded) {
+        return decoded.user_id;
+    } else {
+        return null;
+    }
+}
+
 module.exports = {
     generateToken,
-    getTokenClaims
+    getTokenClaims,
+    getUserId,
 }

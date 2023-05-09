@@ -18,7 +18,7 @@ const userSchema = new Mongoose.Schema({
     password: { type: String, required: true },
     token: { type: String, required: false },
     department: { type: Mongoose.Schema.Types.ObjectId, ref: 'Department' },
-    role: { type: Mongoose.Schema.Types.ObjectId, ref: 'UserRole' },
+    role: { type: Mongoose.Schema.Types.ObjectId, ref: 'UserRole' }
 });
 
 const userRoleSchema = new Mongoose.Schema({
@@ -51,9 +51,9 @@ const taskSchema = new Mongoose.Schema({
 
 const conversationSchema = new Mongoose.Schema({
     message: { type: String, required: true },
-    task_id: { type: Mongoose.Schema.Types.ObjectId, ref: 'Task' },
+    task: { type: Mongoose.Schema.Types.ObjectId, ref: 'Task' },
     files: [{ type: Mongoose.Schema.Types.ObjectId, ref: 'File' }],
-    created_from_id: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
+    created_from: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
     created_at: { type: Date, default: Date.now }
 })
 
@@ -144,7 +144,7 @@ async function checkStaticDatas() {
 
     const defaultTaskTypes = ["istek", "öneri", "sistem hatası", "diğer"];
     const taskTypeList = await TaskType.find();
-    for (let i = 0; i < taskTypeList.length; i++) {
+    for (let i = 0; i < defaultTaskTypes.length; i++) {
         const taskType = defaultTaskTypes[i];
         if (!taskTypeList.find(x => x.name == taskType)) {
             const newTaskType = new TaskType({

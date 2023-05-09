@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <h1>Talepler</h1>
-        <button @click="newTask" class="btn btn-success">Yeni Talep</button>
+        <button @click="createTask" class="btn btn-success">Yeni Talep</button>
         <table>
             <thead>
                 <tr>
@@ -21,14 +21,15 @@
                 <tr v-for="task in getTasks" :key="task._id">
                     <td>{{ task.title }}</td>
                     <td>{{ task.description }}</td>
-                    <td>{{ task.type }}</td>
-                    <td>{{ task.priority }}</td>
-                    <td>{{ task.status }}</td>
+                    <td>{{ task.type.name }}</td>
+                    <td>{{ task.priority.name }}</td>
+                    <td>{{ task.status.name }}</td>
                     <td>{{ task.related_person.full_name }}</td>
                     <td>{{ task.related_department.name }}</td>
                     <td>{{ task.created_from.full_name }}</td>
                     <td>{{ task.created_at }}</td>
 
+                    <td><button @click="openConversations(task._id)" class="btn btn-info">Detaylar</button></td>
                     <td><button @click="editTask(task)" class="btn btn-primary">Düzenle</button></td>
                     <td><button @click="deleteTask(task._id)" class="btn btn-danger">Sil</button></td>
                 </tr>
@@ -36,12 +37,12 @@
         </table>
     </div>
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    <div class="modal fade" id="createEditTaskModal" tabindex="-1" role="dialog" aria-labelledby="createEditTaskModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Yeni Kullanıcı</h5>
+                    <h5 class="modal-title" id="createEditTaskModalLabel">Yeni Talep</h5>
                 </div>
                 <div class="modal-body">
                     <CreateEditTaskComponent :selectedTask="selectedTask"></CreateEditTaskComponent>
@@ -71,17 +72,20 @@ export default {
     },
     methods: {
         createTask() {
-            $('#exampleModal').modal('show')
+            $('#createEditTaskModal').modal('show')
         },
         editTask(task) {
             this.task = task;
-            $('#exampleModal').modal('show')
+            $('#createEditTaskModal').modal('show')
         },
         deleteTask(taskId) {
             if (confirm("Silmek istediğinize emin misiniz?")) {
                 console.log(taskId);
                 this.$store.dispatch("delete_task", { taskId });
             }
+        },
+        openConversations(taskId) {
+            this.$router.push({ name: 'conversations', params: { taskId } })
         }
     }
 }

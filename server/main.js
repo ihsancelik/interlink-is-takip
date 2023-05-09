@@ -20,7 +20,7 @@ const taskController = require('./controllers/task-controller');
 const taskStatusController = require('./controllers/task-status-controller');
 const taskTypeController = require('./controllers/task-type-controller');
 const taskPriorityController = require('./controllers/task-priority-controller');
-
+const conversationController = require('./controllers/conversation-controller');
 
 //Authorization
 const config = require('./config.json');
@@ -36,6 +36,7 @@ app.use(taskController);
 app.use(taskStatusController);
 app.use(taskTypeController);
 app.use(taskPriorityController);
+app.use(conversationController);
 
 
 app.listen(3000, () => { console.log('Server running on port 3000'); });
