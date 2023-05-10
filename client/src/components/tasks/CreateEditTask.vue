@@ -3,15 +3,6 @@
 
         <div class="row">
             <div class="col-md-6">
-                <select v-model="related_person_id" class="form-select mb-2">
-                    <option selected value="-1">İlgili Kişi Seçiniz</option>
-                    <option v-for="user in getUsers" :key="user._id" :value="user._id">
-                        {{ user.full_name }}
-                    </option>
-                </select>
-            </div>
-
-            <div class="col-md-6">
                 <select v-model="related_department_id" class="form-select mb-2" aria-label="Rol">
                     <option selected value="-1">Departman Seçiniz</option>
                     <option v-for="department in getDepartments" :key="department._id" :value="department._id">
@@ -19,46 +10,70 @@
                     </option>
                 </select>
             </div>
+
+            <div class="col-md-6">
+                <select v-model="related_person_id" class="form-select mb-2">
+                    <option selected value="-1">İlgili Kişi Seçiniz</option>
+                    <option v-for="user in getUsers" :key="user._id" :value="user._id">
+                        {{ user.full_name }}
+                    </option>
+                </select>
+            </div>
         </div>
 
-        <div class="col-md-6">
-            <select v-model="type_id" class="form-select mb-2">
-                <option selected value="-1">Talep Tipi Seçiniz</option>
-                <option v-for="type in getTaskTypes" :key="type._id" :value="type._id">
-                    {{ type.name }}
-                </option>
-            </select>
+        <div class="row">
+            <div class="col-md-6">
+                <select v-model="project_id" class="form-select mb-2">
+                    <option selected value="-1">Proje Seçiniz</option>
+                    <option v-for="project in getProjects" :key="project._id" :value="project._id">
+                        {{ project.name }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <select v-model="type_id" class="form-select mb-2">
+                    <option selected value="-1">Talep Tipi Seçiniz</option>
+                    <option v-for="type in getTaskTypes" :key="type._id" :value="type._id">
+                        {{ type.name }}
+                    </option>
+                </select>
+            </div>
         </div>
 
-        <div class="col-md-6">
-            <select v-model="status_id" class="form-select mb-2">
-                <option selected value="-1">Durum Tipi Seçiniz</option>
-                <option v-for="status in getTaskStatuses" :key="status._id" :value="status._id">
-                    {{ status.name }}
-                </option>
-            </select>
+        <div class="row">
+            <div class="col-md-6">
+                <select v-model="status_id" class="form-select mb-2">
+                    <option selected value="-1">Durum Tipi Seçiniz</option>
+                    <option v-for="status in getTaskStatuses" :key="status._id" :value="status._id">
+                        {{ status.name }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <select v-model="priority_id" class="form-select mb-2">
+                    <option selected value="-1">Öncelik Tipi Seçiniz</option>
+                    <option v-for="priority in getTaskPriorities" :key="priority._id" :value="priority._id">
+                        {{ priority.name }}
+                    </option>
+                </select>
+            </div>
         </div>
 
-        <div class="col-md-6">
-            <select v-model="priority_id" class="form-select mb-2">
-                <option selected value="-1">Öncelik Tipi Seçiniz</option>
-                <option v-for="priority in getTaskPriorities" :key="priority._id" :value="priority._id">
-                    {{ priority.name }}
-                </option>
-            </select>
-        </div>
 
         <input v-model="title" class="form-control mb-2" type="text" placeholder="Başlık">
 
-        <textarea v-model="description" class="form-control mb-2" type="text" placeholder="Açıklama">
-        </textarea>
-
-        <button @click="save" class="btn btn-success">Kaydet</button>
+        <QuillEditorComponent theme="snow" toolbar="minimal" v-model:content="description" content-type="html"
+            style="min-height: 250px;" placeholder="Açıklamayı detaylı bir şekilde giriniz!" />
+        <label style="font-style: italic;">* Eğer varsa eklemek istediğiniz dosyaları talebi oluşturduktan sonra detaylar kısmından ekleyebilirsiniz.</label>
+        <button @click="save" class="btn btn-success mt-2">Kaydet</button>
 
     </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 export default {
     props: {
         selectedTask: {
@@ -71,11 +86,22 @@ export default {
             if (val != null) {
                 this.title = val.title;
                 this.description = val.description;
-                this.type_id = val.type_id;
-                this.status_id = val.status_id;
-                this.priority_id = val.priority_id;
-                this.related_person_id = val.related_person_id;
-                this.related_department_id = val.related_department_id;
+                this.project_id = val.project._id;
+                this.type_id = val.type._id;
+                this.status_id = val.status._id;
+                this.priority_id = val.priority._id;
+                this.related_person_id = val.related_person._id;
+                this.related_department_id = val.related_department._id;
+            }
+            else {
+                this.title = "";
+                this.description = "";
+                this.project_id = -1;
+                this.type_id = -1;
+                this.status_id = -1;
+                this.priority_id = -1;
+                this.related_person_id = -1;
+                this.related_department_id = -1;
             }
         }
     },
@@ -85,14 +111,16 @@ export default {
         this.$store.dispatch("taskTypes");
         this.$store.dispatch("taskStatuses");
         this.$store.dispatch("taskPriorities");
+        this.$store.dispatch("projects");
     },
     computed: {
-        ...mapGetters(["getDepartments", "getUsers", "getTaskTypes", "getTaskStatuses", "getTaskPriorities"]),
+        ...mapGetters(["getDepartments", "getUsers", "getTaskTypes", "getTaskStatuses", "getTaskPriorities", "getProjects"]),
     },
     data() {
         return {
             title: "",
             description: "",
+            project_id: -1,
             type_id: -1,
             status_id: -1,
             priority_id: -1,
@@ -100,10 +128,13 @@ export default {
             related_department_id: -1
         }
     },
+    components: {
+        QuillEditorComponent: QuillEditor
+    },
     methods: {
         save() {
             if (this.title === "" || this.description === "" || this.type_id === -1 || this.status_id === -1 ||
-                this.priority_id === -1 || this.related_person_id === -1 || this.related_department_id === -1) {
+                this.priority_id === -1 || this.related_person_id === -1 || this.related_department_id === -1 || this.project_id === -1) {
                 alert("Lütfen tüm alanları doldurunuz!");
                 return;
             }
@@ -112,6 +143,7 @@ export default {
                 this.$store.dispatch("create_task", {
                     title: this.title,
                     description: this.description,
+                    project: this.project_id,
                     type: this.type_id,
                     status: this.status_id,
                     priority: this.priority_id,
@@ -128,6 +160,7 @@ export default {
                     taskId: this.selectedTask._id,
                     title: this.title,
                     description: this.description,
+                    project: this.project_id,
                     type: this.type_id,
                     status: this.status_id,
                     priority: this.priority_id,

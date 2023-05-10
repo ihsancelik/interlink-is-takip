@@ -21,11 +21,17 @@ router.get('/conversations/:taskId', async (req, res) => {
     }
 });
 
-router.post('/conversations', upload.array('files'), async (req, res) => {
+router.post('/conversations/:taskId', upload.array('files'), async (req, res) => {
     try {
-        const { name, task_id } = req.body
-        const created_from_id = -1;
-        const conversation = new Conversation({ task_id, name, created_from_id })
+        const task_id = req.params.taskId;
+        const message = req.body.message
+        const created_from = req.auth.user_id;
+
+        const conversation = new Conversation({
+            task: task_id,
+            message: message,
+            created_from: created_from,
+        })
 
         if (req.files && req.files.length > 0) {
             const savedFiles = [];
@@ -34,7 +40,7 @@ router.post('/conversations', upload.array('files'), async (req, res) => {
                 const savedFile = new File({
                     file_name: originalname,
                     virtual_file_name: filename,
-                    created_from_id,
+                    created_from: created_from,
                 });
                 await savedFile.save();
                 savedFiles.push(savedFile);

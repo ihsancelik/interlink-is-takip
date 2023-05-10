@@ -6,7 +6,7 @@
             <thead>
                 <tr>
                     <th>Başlık</th>
-                    <th>Açıklama</th>
+                    <th>Proje</th>
                     <th>Tip</th>
                     <th>Öncelik</th>
                     <th>Durum</th>
@@ -19,8 +19,8 @@
             </thead>
             <tbody>
                 <tr v-for="task in getTasks" :key="task._id">
-                    <td>{{ task.title }}</td>
-                    <td>{{ task.description }}</td>
+                    <td v-html="task.title"></td>
+                    <td>{{ task.project.name }}</td>
                     <td>{{ task.type.name }}</td>
                     <td>{{ task.priority.name }}</td>
                     <td>{{ task.status.name }}</td>
@@ -72,10 +72,11 @@ export default {
     },
     methods: {
         createTask() {
+            this.selectedTask = null;
             $('#createEditTaskModal').modal('show')
         },
         editTask(task) {
-            this.task = task;
+            this.selectedTask = task;
             $('#createEditTaskModal').modal('show')
         },
         deleteTask(taskId) {

@@ -15,7 +15,7 @@ router.get('/users', async (req, res) => {
 
 router.post('/users', async (req, res) => {
     try {
-        const { full_name, username, password, departmentid, roleid } = req.body.data;
+        const { full_name, email, gsm, username, password, departmentid, roleid } = req.body.data;
 
         // Check if the department exists
         const existingDepartment = await Department.findById(departmentid);
@@ -32,6 +32,8 @@ router.post('/users', async (req, res) => {
             full_name,
             username,
             password,
+            email,
+            gsm,
             department: existingDepartment._id,
             role: existingRole._id
         });
@@ -47,7 +49,7 @@ router.post('/users', async (req, res) => {
 router.put('/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
-        const { full_name, username, password, departmentid, roleid } = req.body.data;
+        const { full_name, email, gsm, username, password, departmentid, roleid } = req.body.data;
 
         // Check if the user exists
         let existingUser = await User.findById(userId);
@@ -68,6 +70,8 @@ router.put('/users/:id', async (req, res) => {
         }
 
         existingUser.full_name = full_name;
+        existingUser.email = email;
+        existingUser.gsm = gsm;
         existingUser.username = username;
         existingUser.password = password;
         existingUser.department = existingDepartment._id;

@@ -16,6 +16,8 @@ const userSchema = new Mongoose.Schema({
     full_name: String,
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    gsm: { type: String, required: false, unique: false },
     token: { type: String, required: false },
     department: { type: Mongoose.Schema.Types.ObjectId, ref: 'Department' },
     role: { type: Mongoose.Schema.Types.ObjectId, ref: 'UserRole' }
@@ -40,6 +42,7 @@ const taskPrioritySchema = new Mongoose.Schema({
 const taskSchema = new Mongoose.Schema({
     title: { type: String, required: false },
     description: { type: String, required: false },
+    related_project: { type: Mongoose.Schema.Types.ObjectId, ref: 'Project' },
     related_person: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
     related_department: { type: Mongoose.Schema.Types.ObjectId, ref: 'Department' },
     type: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskType' },
@@ -60,13 +63,13 @@ const conversationSchema = new Mongoose.Schema({
 const fileSchema = new Mongoose.Schema({
     file_name: { type: String, required: true },
     virtual_file_name: { type: String, required: true },
-    created_from_id: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
+    created_from: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
     created_at: { type: Date, default: Date.now }
 })
 
 const activityLogSchema = new Mongoose.Schema({
-    task_id: { type: Mongoose.Schema.Types.ObjectId, ref: 'Task' },
-    user_id: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
+    task: { type: Mongoose.Schema.Types.ObjectId, ref: 'Task' },
+    user: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
     message: { type: String, required: true },
     created_at: { type: Date, default: Date.now }
 })
@@ -96,6 +99,19 @@ checkStaticDatas();
 
 
 async function checkStaticDatas() {
+
+    const projects = ["Akdeniz Chemson Plus", "Bizim Toptan Plus Satışçı", "Bizim Toptan Plus Müşteri", "BAT Plus"]
+    const projectList = await Project.find();
+    for (let i = 0; i < projects.length; i++) {
+        const project = projects[i];
+        if (!projectList.find(x => x.name == project)) {
+            const newProject = await new Project({
+                name: project
+            }).save();
+        }
+    }
+
+
     let department = await Department.findOne({ name: "yazılım" });
     if (!department) {
         const newDepartment = new Department({
@@ -120,9 +136,11 @@ async function checkStaticDatas() {
     const adminUser = await User.findOne({ username: "admin" });
     if (!adminUser) {
         const newUser = new User({
-            full_name: "admin",
+            full_name: "John Wick",
             username: "admin",
             password: "admin",
+            email: "admin@interlink.com.tr",
+            phone: "5555555555",
             department: department._id,
             role: adminRole._id
         });
@@ -130,14 +148,31 @@ async function checkStaticDatas() {
     }
 
     const managerRole = await UserRole.findOne({ name: "yönetici" });
-    const softwareManagerUser = await User.findOne({ username: "yazilim_yonetici" });
+    const softwareManagerUser = await User.findOne({ username: "yusuf" });
     if (!softwareManagerUser) {
         const newUser = new User({
-            full_name: "yazilim_yonetici",
-            username: "yazilim_yonetici",
-            password: "yazilim_yonetici",
+            full_name: "Yusuf Çağrı Doruk",
+            username: "yusuf",
+            password: "1234",
+            email: "yusuf.doruk@interlink.com.tr",
+            phone: "5321765550",
             department: department._id,
             role: managerRole._id
+        });
+        await newUser.save();
+    }
+
+    const defaultRole = await UserRole.findOne({ name: "kullanıcı" });
+    const softwareUser = await User.findOne({ username: "ihsan" });
+    if (!softwareUser) {
+        const newUser = new User({
+            full_name: "İhsan Ç.",
+            username: "ihsan",
+            password: "1234",
+            email: "ihsan.celik@interlink.com.tr",
+            phone: "5541204422",
+            department: department._id,
+            role: defaultRole._id
         });
         await newUser.save();
     }

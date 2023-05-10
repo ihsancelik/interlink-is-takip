@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { Task } = require('../db');
-const { getUserId } = require('../services/token-service')
 
 //task list
 router.get('/tasks', async (req, res) => {
     try {
         const tasks = await Task.find()
+            .populate('related_project')
             .populate('related_person')
             .populate('related_department')
             .populate('type')
@@ -23,9 +23,9 @@ router.get('/tasks', async (req, res) => {
 
 router.post('/tasks', async (req, res) => {
     try {
-        const { title, description, related_person, related_department, type, status, priority } = req.body.data;
-        const created_from = getUserId(req);
-        const task = new Task({ title, description, related_person, related_department, type, status, priority, created_from });
+        const { title, description, related_project, related_person, related_department, type, status, priority } = req.body.data;
+        const created_from = req.auth.user_id;
+        const task = new Task({ title, description, related_project, related_person, related_department, type, status, priority, created_from });
         const savedTask = await task.save();
         res.status(201).json(savedTask);
     } catch (err) {
@@ -34,13 +34,33 @@ router.post('/tasks', async (req, res) => {
     }
 });
 
-router.put('/tasks/:id', async (req, res) => {
+router.post('/tasks/change-status/:taskId', async (req, res) => {
     const { taskId } = req.params.taskId;
-    const { title, description, related_person, related_department, type, status, priority } = req.body.data;
+    const { status } = req.body.data;
     try {
         const updatedTask = await Task.findByIdAndUpdate(
             taskId,
-            { title, description, related_person, related_department, type, status, priority },
+            { status },
+            { new: true }
+        );
+        if (!updatedTask) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+        res.json(updatedTask);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Could not update task status' });
+    }
+});
+
+router.put('/tasks/:id', async (req, res) => {
+    const id = req.params.id;
+    const { title, description, related_person, related_project, related_department, type, status, priority } = req.body.data;
+    try {
+        const updatedTask = await Task.findByIdAndUpdate(
+            id,
+            { title, description, related_person, related_project, related_department, type, status, priority },
             { new: true }
         );
         if (!updatedTask) {

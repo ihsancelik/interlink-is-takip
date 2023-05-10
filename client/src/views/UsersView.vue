@@ -2,10 +2,12 @@
     <div class="container">
         <h1>Kullanıcılar</h1>
         <button @click="newUser" class="btn btn-success">Yeni Kullanıcı</button>
-        <table>
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th>İsim Soyisim</th>
+                    <th>E-Posta</th>
+                    <th>GSM</th>
                     <th>Kullanıcı Adı</th>
                     <th>Şifre</th>
                     <th>Departman</th>
@@ -16,6 +18,8 @@
             <tbody>
                 <tr v-for="user in getUsers" :key="user._id">
                     <td>{{ user.full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.gsm }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.password }}</td>
                     <td>{{ user.department.name }}</td>

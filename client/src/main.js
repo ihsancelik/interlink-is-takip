@@ -5,6 +5,7 @@ import router from './router'
 import axios from 'axios'
 
 import './assets/main.css'
+import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const app = createApp(App)
 
@@ -21,7 +22,8 @@ const store = new createStore({
         taskStatuses: null,
         taskPriorities: null,
         conversations: null,
-        departmentManager: null
+        departmentManager: null,
+        projects: null,
     },
     mutations: {
         setUser(state, user) {
@@ -54,7 +56,9 @@ const store = new createStore({
         },
         setDepartmentManager(state, departmentManager) {
             state.departmentManager = departmentManager
-            console.log('setDepartmentManager')
+        },
+        setProjects(state, projects) {
+            state.projects = projects
         }
 
     },
@@ -89,12 +93,12 @@ const store = new createStore({
                 return false;
             }
         },
-        async create_user({ commit }, { full_name, username, password, departmentid, roleid }) {
+        async create_user({ commit }, { full_name, email, gsm, username, password, departmentid, roleid }) {
             try {
                 const token = JSON.parse(this.state.user).token;
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-                const data = { full_name, username, password, departmentid, roleid }
+                const data = { full_name, email, gsm, username, password, departmentid, roleid }
                 console.log(data)
 
                 await axios.post('http://localhost:3000/users',
@@ -108,12 +112,12 @@ const store = new createStore({
                 throw error;
             }
         },
-        async edit_user({ commit }, { userId, full_name, username, password, departmentid, roleid }) {
+        async edit_user({ commit }, { userId, full_name, email, gsm, username, password, departmentid, roleid }) {
             try {
                 const token = JSON.parse(this.state.user).token;
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-                const data = { full_name, username, password, departmentid, roleid }
+                const data = { full_name, email, gsm, username, password, departmentid, roleid }
                 console.log(data)
 
                 await axios.put('http://localhost:3000/users/' + userId,
@@ -225,6 +229,22 @@ const store = new createStore({
                 return false;
             }
         },
+        async projects({ commit }) {
+            try {
+                const token = JSON.parse(this.state.user).token;
+                const projects = await axios.get('http://localhost:3000/projects', {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                commit('setProjects', projects.data);
+                return true;
+            } catch (error) {
+                console.error(error);
+                return false;
+            }
+        },
 
         async tasks({ commit }) {
             try {
@@ -242,12 +262,12 @@ const store = new createStore({
                 return false;
             }
         },
-        async create_task({ commit }, { title, description, related_person, related_department, type, status, priority }) {
+        async create_task({ commit }, { title, description, related_project, related_person, related_department, type, status, priority }) {
             try {
                 const token = JSON.parse(this.state.user).token;
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-                const data = { title, description, related_person, related_department, type, status, priority }
+                const data = { title, description, related_project, related_person, related_department, type, status, priority }
                 console.log(data)
 
                 await axios.post('http://localhost:3000/tasks',
@@ -261,12 +281,12 @@ const store = new createStore({
                 throw error;
             }
         },
-        async edit_task({ commit }, { taskId, title, description, related_person, related_department, type, status, priority }) {
+        async edit_task({ commit }, { taskId, title, description, related_project, related_person, related_department, type, status, priority }) {
             try {
                 const token = JSON.parse(this.state.user).token;
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-                const data = { title, description, related_person, related_department, type, status, priority }
+                const data = { title, description, related_project, related_person, related_department, type, status, priority }
                 console.log(data)
 
                 await axios.put('http://localhost:3000/tasks/' + taskId,
@@ -360,8 +380,10 @@ const store = new createStore({
             return state.conversations
         },
         getDepartmentManager(state) {
-            console.log('getDepartmentManager')
             return state.departmentManager
+        },
+        getProjects(state) {
+            return state.projects
         }
     }
 });

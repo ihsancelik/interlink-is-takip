@@ -22,6 +22,17 @@
 
         <input v-model="full_name" class="form-control mb-2" type="text" placeholder="İsim Soyisim">
 
+
+        <div class="row">
+            <div class="col-md-6">
+                <input v-model="email" class="form-control mb-2" type="text" placeholder="E-Posta">
+            </div>
+            <div class="col-md-6">
+                <input v-model="gsm" class="form-control mb-2" type="text" placeholder="GSM">
+            </div>
+        </div>
+
+
         <div class="row">
             <div class="col-md-6">
                 <input v-model="username" class="form-control mb-2" type="text" placeholder="Kullanıcı Adı">
@@ -48,6 +59,8 @@ export default {
         selectedUser: function (val) {
             if (val != null) {
                 this.full_name = val.full_name;
+                this.email = val.email;
+                this.gsm = val.gsm;
                 this.username = val.username;
                 this.password = val.password;
                 this.departmentid = val.department._id;
@@ -65,6 +78,8 @@ export default {
     data() {
         return {
             full_name: "",
+            email: "",
+            gsm: "",
             username: "",
             password: "",
             departmentid: -1,
@@ -73,7 +88,8 @@ export default {
     },
     methods: {
         save() {
-            if (this.full_name == "" || this.username == "" || this.password == "" || this.departmentid == -1 || this.roleid == -1) {
+            if (!this.full_name || !this.username || !this.password || this.departmentid == -1 || this.roleid == -1
+                || !this.email || !this.gsm) {
                 alert("Lütfen tüm alanları doldurunuz!");
                 return;
             }
@@ -81,6 +97,8 @@ export default {
             if (this.selectedUser === null) {
                 this.$store.dispatch("create_user", {
                     full_name: this.full_name,
+                    email: this.email,
+                    gsm: this.gsm,
                     username: this.username,
                     password: this.password,
                     departmentid: this.departmentid,
@@ -95,6 +113,8 @@ export default {
                 this.$store.dispatch("edit_user", {
                     userId: this.selectedUser._id,
                     full_name: this.full_name,
+                    email: this.email,
+                    gsm: this.gsm,
                     username: this.username,
                     password: this.password,
                     departmentid: this.departmentid,
