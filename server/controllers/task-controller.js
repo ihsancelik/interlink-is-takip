@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Task, User } = require('../db');
 const { addActivityLog } = require('../services/activity-log-service');
-const { taskActivityAction } = require('../constants/task-activity-action');
+const { taskActivityAction } = require('../constants/activityActionConstants');
 
 // get task from id
 router.get('/tasks/:id', async (req, res) => {

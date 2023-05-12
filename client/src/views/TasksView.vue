@@ -29,9 +29,11 @@
                     <td>{{ task.created_from.full_name }}</td>
                     <td>{{ task.created_at }}</td>
 
-                    <td><a @click="openConversations(task._id)">Detaylar</a>&nbsp;
-                        <a @click="editTask(task)">Düzenle</a>&nbsp;
-                        <a @click="deleteTask(task._id)">Sil</a>
+                    <td>
+                        <a href="javascript:void(0);" @click="openConversations(task._id)">Detaylar</a>&nbsp;
+                        <a href="javascript:void(0);" @click="editTask(task)">Düzenle</a>&nbsp;
+                        <a href="javascript:void(0);" @click="deleteTask(task._id)">Sil</a>&nbsp;
+                        <a href="javascript:void(0);" @click="sentReminder(task._id)">Hatırlatma Gönder</a>
                     </td>
                 </tr>
             </tbody>
@@ -57,6 +59,7 @@ import { mapGetters } from 'vuex'
 import CreateEditTaskComponent from '../components/tasks/CreateEditTask.vue'
 import DataTable from 'datatables.net-dt';
 import 'datatables.net-responsive-dt';
+import { sent_reminder } from '../services/service'
 export default {
     mounted() {
         this.$store.dispatch("tasks");
@@ -81,6 +84,11 @@ export default {
         CreateEditTaskComponent
     },
     methods: {
+        sentReminder(taskId) {
+            if(confirm("Hatırlatma göndermek istediğinize emin misiniz?")){
+                sent_reminder({ taskId: taskId });
+            }
+        },
         createTask() {
             this.selectedTask = null;
             $('#createEditTaskModal').modal('show')

@@ -104,3 +104,18 @@ export async function download_file({ virtualFileName, fileName }) {
         throw error;
     }
 }
+
+
+export async function sent_reminder({ taskId }) {
+    try {
+        const token = JSON.parse(localStorage.getItem('user')).token;
+        const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        await axios.get('http://localhost:3000/tasks/send-reminder/' + taskId,
+            { headers: headers });
+
+        return true;
+    } catch (error) {
+        console.error(error);
+        return Promise.reject(error);
+    }
+}

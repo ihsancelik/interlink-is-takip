@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const util = require('util');
 const { MailAccount } = require('../db');
 
-export async function sendEmail(subject, message, toList) {
+async function sendEmail(subject, message, toList) {
 
     const { email, host, port, secure, username, password } = MailAccount.findOne({})[0];
 
@@ -31,4 +31,8 @@ export async function sendEmail(subject, message, toList) {
     } catch (error) {
         console.log(error);
     }
+}
+
+module.exports = {
+    sendEmail
 }

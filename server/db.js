@@ -1,5 +1,5 @@
 const Mongoose = require('mongoose');
-const { getTaskActivityActions } = require('../constants/task-activity-action');
+const { getTaskActivityActions } = require('./constants/activityActionConstants');
 
 const projectSchema = new Mongoose.Schema({
     name: { type: String, required: true, unique: true }
