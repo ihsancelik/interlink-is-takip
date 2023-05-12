@@ -287,7 +287,6 @@ const store = new createStore({
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
                 const data = { title, description, related_project, related_person, related_department, type, status, priority }
-                console.log(data)
 
                 await axios.put('http://localhost:3000/tasks/' + taskId,
                     { data: data },

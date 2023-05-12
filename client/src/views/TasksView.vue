@@ -2,7 +2,7 @@
     <div class="container">
         <h1>Talepler</h1>
         <button @click="createTask" class="btn btn-success">Yeni Talep</button>
-        <table>
+        <table class="table table-striped" id="task-table">
             <thead>
                 <tr>
                     <th>Başlık</th>
@@ -20,7 +20,7 @@
             <tbody>
                 <tr v-for="task in getTasks" :key="task._id">
                     <td v-html="task.title"></td>
-                    <td>{{ task.project.name }}</td>
+                    <td>{{ task.related_project.name }}</td>
                     <td>{{ task.type.name }}</td>
                     <td>{{ task.priority.name }}</td>
                     <td>{{ task.status.name }}</td>
@@ -29,9 +29,10 @@
                     <td>{{ task.created_from.full_name }}</td>
                     <td>{{ task.created_at }}</td>
 
-                    <td><button @click="openConversations(task._id)" class="btn btn-info">Detaylar</button></td>
-                    <td><button @click="editTask(task)" class="btn btn-primary">Düzenle</button></td>
-                    <td><button @click="deleteTask(task._id)" class="btn btn-danger">Sil</button></td>
+                    <td><a @click="openConversations(task._id)">Detaylar</a>&nbsp;
+                        <a @click="editTask(task)">Düzenle</a>&nbsp;
+                        <a @click="deleteTask(task._id)">Sil</a>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -54,12 +55,21 @@
 <script>
 import { mapGetters } from 'vuex'
 import CreateEditTaskComponent from '../components/tasks/CreateEditTask.vue'
+import DataTable from 'datatables.net-dt';
+import 'datatables.net-responsive-dt';
 export default {
     mounted() {
         this.$store.dispatch("tasks");
     },
     computed: {
         ...mapGetters(["getTasks"])
+    },
+    watch: {
+        getUsers() {
+            this.$nextTick(function () {
+                new DataTable('#user-table');
+            })
+        }
     },
     data() {
         return {

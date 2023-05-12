@@ -1,8 +1,28 @@
 const express = require('express');
 const router = express.Router();
-const { Task } = require('../db');
+const { Task, User } = require('../db');
+const { addActivityLog } = require('../services/activity-log-service');
+const { taskActivityAction } = require('../constants/task-activity-action');
 
-//task list
+// get task from id
+router.get('/tasks/:id', async (req, res) => {
+    try {
+        const taskId = req.params.id;
+        const task = await Task.findById(taskId)
+            .populate('related_project')
+            .populate('related_person')
+            .populate('related_department')
+            .populate('type')
+            .populate('status')
+            .populate('priority')
+            .populate('created_from')
+        res.json(task);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Could not get task' });
+    }
+});
+
 router.get('/tasks', async (req, res) => {
     try {
         const tasks = await Task.find()
@@ -34,8 +54,8 @@ router.post('/tasks', async (req, res) => {
     }
 });
 
-router.post('/tasks/change-status/:taskId', async (req, res) => {
-    const { taskId } = req.params.taskId;
+router.put('/tasks/change-status/:taskId', async (req, res) => {
+    const taskId = req.params.taskId;
     const { status } = req.body.data;
     try {
         const updatedTask = await Task.findByIdAndUpdate(
@@ -85,6 +105,27 @@ router.delete('/tasks/:id', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Could not delete task' });
+    }
+});
+
+
+router.get('/tasks/send-reminder/:taskId', async (req, res) => {
+    const task_id = req.params.taskId;
+    try {
+        const task = Task.findById(task_id);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        const user_id = req.auth.user_id;
+        const user = await User.findById(user_id);
+
+        // send reminder
+        addActivityLog(user, task, taskActivityAction.REMINDER_SENT, null, user_id);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Could not send reminder' });
     }
 });
 

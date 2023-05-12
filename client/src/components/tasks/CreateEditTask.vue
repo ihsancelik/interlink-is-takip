@@ -23,7 +23,7 @@
 
         <div class="row">
             <div class="col-md-6">
-                <select v-model="project_id" class="form-select mb-2">
+                <select v-model="related_project_id" class="form-select mb-2">
                     <option selected value="-1">Proje Seçiniz</option>
                     <option v-for="project in getProjects" :key="project._id" :value="project._id">
                         {{ project.name }}
@@ -86,20 +86,20 @@ export default {
             if (val != null) {
                 this.title = val.title;
                 this.description = val.description;
-                this.project_id = val.project._id;
                 this.type_id = val.type._id;
                 this.status_id = val.status._id;
                 this.priority_id = val.priority._id;
+                this.related_project_id = val.related_project._id;
                 this.related_person_id = val.related_person._id;
                 this.related_department_id = val.related_department._id;
             }
             else {
                 this.title = "";
                 this.description = "";
-                this.project_id = -1;
                 this.type_id = -1;
                 this.status_id = -1;
                 this.priority_id = -1;
+                this.related_project_id = -1;
                 this.related_person_id = -1;
                 this.related_department_id = -1;
             }
@@ -125,7 +125,8 @@ export default {
             status_id: -1,
             priority_id: -1,
             related_person_id: -1,
-            related_department_id: -1
+            related_department_id: -1,
+            related_project_id: -1
         }
     },
     components: {
@@ -134,7 +135,7 @@ export default {
     methods: {
         save() {
             if (this.title === "" || this.description === "" || this.type_id === -1 || this.status_id === -1 ||
-                this.priority_id === -1 || this.related_person_id === -1 || this.related_department_id === -1 || this.project_id === -1) {
+                this.priority_id === -1 || this.related_person_id === -1 || this.related_department_id === -1 || this.related_project_id === -1) {
                 alert("Lütfen tüm alanları doldurunuz!");
                 return;
             }
@@ -143,10 +144,10 @@ export default {
                 this.$store.dispatch("create_task", {
                     title: this.title,
                     description: this.description,
-                    project: this.project_id,
                     type: this.type_id,
                     status: this.status_id,
                     priority: this.priority_id,
+                    related_project: this.related_project_id,
                     related_person: this.related_person_id,
                     related_department: this.related_department_id
                 }).then(() => {
@@ -160,10 +161,10 @@ export default {
                     taskId: this.selectedTask._id,
                     title: this.title,
                     description: this.description,
-                    project: this.project_id,
                     type: this.type_id,
                     status: this.status_id,
                     priority: this.priority_id,
+                    related_project: this.related_project_id,
                     related_person: this.related_person_id,
                     related_department: this.related_department_id
                 }).then(() => {

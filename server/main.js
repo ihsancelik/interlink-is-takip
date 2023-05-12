@@ -6,6 +6,7 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+
 app.use(express.static(__dirname + '/uploads'));
 
 // if not exist __dirname + '/uploads' folder, create it'
@@ -22,11 +23,15 @@ const taskTypeController = require('./controllers/task-type-controller');
 const taskPriorityController = require('./controllers/task-priority-controller');
 const conversationController = require('./controllers/conversation-controller');
 const projectController = require('./controllers/project-controller');
+const storageController = require('./controllers/storage-controller');
 
 //Authorization
 const config = require('./config.json');
 const { expressjwt } = require('express-jwt');
-app.use(expressjwt({ secret: config.jwt['secret-key'], algorithms: ["HS256"] }).unless({ path: ["/login"] }));
+app.use(expressjwt({ secret: config.jwt['secret-key'], algorithms: ["HS256"] })
+    .unless(
+        { path: ["/login"] }
+    ));
 
 // Controllers
 app.use(authenticationController);
@@ -39,5 +44,6 @@ app.use(taskTypeController);
 app.use(taskPriorityController);
 app.use(conversationController);
 app.use(projectController);
+app.use(storageController);
 
 app.listen(3000, () => { console.log('Server running on port 3000'); });

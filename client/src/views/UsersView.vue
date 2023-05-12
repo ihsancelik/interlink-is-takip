@@ -2,7 +2,7 @@
     <div class="container">
         <h1>Kullanıcılar</h1>
         <button @click="newUser" class="btn btn-success">Yeni Kullanıcı</button>
-        <table class="table table-striped">
+        <table class="table table-striped" id="user-table">
             <thead>
                 <tr>
                     <th>İsim Soyisim</th>
@@ -24,8 +24,10 @@
                     <td>{{ user.password }}</td>
                     <td>{{ user.department.name }}</td>
                     <td>{{ user.role.name }}</td>
-                    <td><button @click="editUser(user)" class="btn btn-primary">Düzenle</button></td>
-                    <td><button @click="deleteUser(user._id)" class="btn btn-danger">Sil</button></td>
+                    <td>
+                        <a href="#" @click="editUser(user)">Düzenle</a>&nbsp;
+                        <a href="#" @click="deleteUser(user._id)">Sil</a>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -48,12 +50,21 @@
 <script>
 import { mapGetters } from 'vuex'
 import CreateEditUserComponent from '../components/users/CreateEditUser.vue'
+import DataTable from 'datatables.net-dt';
+import 'datatables.net-responsive-dt';
 export default {
     mounted() {
         this.$store.dispatch("users");
     },
     computed: {
         ...mapGetters(["getUsers"])
+    },
+    watch: {
+        getUsers() {
+            this.$nextTick(function () {
+                new DataTable('#user-table');
+            })
+        }
     },
     data() {
         return {

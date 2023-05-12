@@ -1,4 +1,5 @@
 const Mongoose = require('mongoose');
+const { getTaskActivityActions } = require('../constants/task-activity-action');
 
 const projectSchema = new Mongoose.Schema({
     name: { type: String, required: true, unique: true }
@@ -67,11 +68,26 @@ const fileSchema = new Mongoose.Schema({
     created_at: { type: Date, default: Date.now }
 })
 
-const activityLogSchema = new Mongoose.Schema({
-    task: { type: Mongoose.Schema.Types.ObjectId, ref: 'Task' },
+const taskActivityActionSchema = new Mongoose.Schema({
+    name: { type: String, required: true, unique: true }
+})
+
+const taskActivityLogSchema = new Mongoose.Schema({
     user: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
-    message: { type: String, required: true },
+    task: { type: Mongoose.Schema.Types.ObjectId, ref: 'Task' },
+    action: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskActivityAction' },
+    action_message: { type: String, required: true },
+    old_data: { type: String, required: false },
     created_at: { type: Date, default: Date.now }
+})
+
+const mailAccountSchema = new Mongoose.Schema({
+    email: { type: String, required: true, unique: true },
+    host: { type: String, required: true },
+    port: { type: Number, required: true },
+    secure: { type: Boolean, required: true },
+    username: { type: String, required: true },
+    password: { type: String, required: true }
 })
 
 const Project = Mongoose.model('Project', projectSchema);
@@ -84,7 +100,9 @@ const TaskPriority = Mongoose.model('TaskPriority', taskPrioritySchema);
 const TaskType = Mongoose.model('TaskType', taskTypeSchema);
 const Conversation = Mongoose.model('Conversation', conversationSchema);
 const File = Mongoose.model('File', fileSchema);
-const ActivityLog = Mongoose.model('ActivityLog', activityLogSchema);
+const TaskActivityAction = Mongoose.model('TaskActivityActionSchema', taskActivityActionSchema);
+const TaskActivityLog = Mongoose.model('TaskActivityLog', taskActivityLogSchema);
+const MailAccount = Mongoose.model('MailAccount', mailAccountSchema);
 
 Mongoose.connect("mongodb://localhost:27017/istakipdb")
     .then(() => {
@@ -212,6 +230,18 @@ async function checkStaticDatas() {
             await newTaskPriority.save();
         }
     }
+
+    const taskActivityActionList = getTaskActivityActions();
+    const taskActivityActionListDb = await TaskActivityAction.find();
+    for (let i = 0; i < taskActivityActionList.length; i++) {
+        const action = taskActivityActionList[i];
+        if (!taskActivityActionListDb.find(x => x.name == action)) {
+            const newTaskActivityAction = new TaskActivityAction({
+                name: action
+            });
+            await newTaskActivityAction.save();
+        }
+    }
 }
 
 module.exports = {
@@ -225,5 +255,7 @@ module.exports = {
     TaskType,
     Conversation,
     File,
-    ActivityLog
+    TaskActivityAction,
+    TaskActivityLog,
+    MailAccount
 };

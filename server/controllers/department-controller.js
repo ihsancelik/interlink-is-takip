@@ -18,6 +18,7 @@ router.get('/departments/manager/:departmentId', async (req, res) => {
         const departmentId = req.params.departmentId;
         const managerRole = await UserRole.findOne({ name: 'yönetici' });
         const user = await User.findOne({ department: departmentId, role: managerRole._id });
+        user.password = undefined;
         res.json(user);
     } catch (err) {
         console.error(err);
