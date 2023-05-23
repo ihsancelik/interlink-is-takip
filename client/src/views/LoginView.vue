@@ -25,19 +25,18 @@ export default {
     },
     methods: {
         login() {
+            const device_id = localStorage.getItem("device_id");
             this.$store.dispatch("login", {
                 username: this.username,
-                password: this.password
-            }).then(() => {
-                this.$router.push("/dashboard");
-            }).catch(() => {
-                alert("Kullanıcı adı veya şifre hatalı!");
-            });
-        }
-    },
-    computed: {
-        isAuthenticated() {
-            return this.$store.getters.isAuthenticated;
+                password: this.password,
+                device_id: device_id
+            })
+                .then(response => {
+                    if (response)
+                        this.$router.push({ name: 'tasks' })
+                    else
+                        alert("Kullanıcı adı veya şifre hatalı!")
+                })
         }
     }
 }

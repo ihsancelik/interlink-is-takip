@@ -1,0 +1,11 @@
+{
+    "firebaseApp": {
+        "apiKey": "AIzaSyDMR3It86XHE1vd7udZ4AsfdeS0zUK7CNU",
+        "authDomain": "interlink-is-takip.firebaseapp.com",
+        "projectId": "interlink-is-takip",
+        "storageBucket": "interlink-is-takip.appspot.com",
+        "messagingSenderId": "569688326812",
+        "appId": "1:569688326812:web:fc36f5ff509bfe824d6359",
+        "vapidKey": "BLpmRE4YWqiQ4x-kl3G2-7gWYrkJNgDorgqumKLK_M4txPEji0AFH132MoCocZ7yrgNAM6LpLv4XVHKj9CO-03s"
+    }
+}

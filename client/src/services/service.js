@@ -64,6 +64,70 @@ export async function change_task_status({ taskId, status }) {
     }
 }
 
+export async function change_task_priority({ taskId, priority }) {
+    try {
+        const token = JSON.parse(localStorage.getItem('user')).token;
+        const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        const data = { priority: priority }
+        await axios.put('http://localhost:3000/tasks/change-priority/' + taskId,
+            { data: data },
+            { headers: headers });
+
+        return true;
+    } catch (error) {
+        console.error(error);
+        return Promise.reject(error);
+    }
+}
+
+export async function change_task_type({ taskId, type }) {
+    try {
+        const token = JSON.parse(localStorage.getItem('user')).token;
+        const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        const data = { type: type }
+        await axios.put('http://localhost:3000/tasks/change-type/' + taskId,
+            { data: data },
+            { headers: headers });
+
+        return true;
+    } catch (error) {
+        console.error(error);
+        return Promise.reject(error);
+    }
+}
+
+export async function change_task_project({ taskId, project }) {
+    try {
+        const token = JSON.parse(localStorage.getItem('user')).token;
+        const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        const data = { project: project }
+        await axios.put('http://localhost:3000/tasks/change-project/' + taskId,
+            { data: data },
+            { headers: headers });
+
+        return true;
+    } catch (error) {
+        console.error(error);
+        return Promise.reject(error);
+    }
+}
+
+export async function change_task_related_person({ taskId, related_person }) {
+    try {
+        const token = JSON.parse(localStorage.getItem('user')).token;
+        const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        const data = { related_person: related_person }
+        await axios.put('http://localhost:3000/tasks/change-related-person/' + taskId,
+            { data: data },
+            { headers: headers });
+
+        return true;
+    } catch (error) {
+        console.error(error);
+        return Promise.reject(error);
+    }
+}
+
 
 export async function get_task({ taskId }) {
     try {
@@ -84,7 +148,7 @@ export async function get_task({ taskId }) {
 export async function download_file({ virtualFileName, fileName }) {
     try {
         const token = JSON.parse(localStorage.getItem('user')).token;
-        const response = await axios.get('http://localhost:3000/storage/' + virtualFileName, {
+        const response = await axios.get('https://localhost:3000/storage/' + virtualFileName, {
             responseType: 'blob',
             headers: {
                 "Content-Type": "application/json",

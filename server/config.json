@@ -2,5 +2,9 @@
     "jwt": {
         "secret-key": "S34fsf4ı2$42224!!^4km4fımfFso4çff4oma33i##32mım2",
         "expires-in": "9999d"
+    },
+    "google-fcm": {
+        "url": "https://fcm.googleapis.com/fcm/send",
+        "authorization": "key=AAAAhKQSApw:APA91bEHWX5jRuzX-rsgfYqh8_QF0duoRZ6qH0OAsN3jBSg-krq6a58jzoNCp79-UHsn0iswknF-c-9-X-eGFAAXZVOoV81d4L-A7m_rO4vfbRmBDZJg1UxIIo5KpNEZZimZHeXf__HT"
     }
 }

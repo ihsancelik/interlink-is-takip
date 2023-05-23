@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { initializeNotificationWebSocketServer } = require('./services/notificationHub')
 
 const app = express();
 
@@ -46,4 +47,14 @@ app.use(conversationController);
 app.use(projectController);
 app.use(storageController);
 
-app.listen(3000, () => { console.log('Server running on port 3000'); });
+
+// start the https server. ca.crt and ca.key files are required on config folder for https
+// const https = require('https');
+// const privateKey = fs.readFileSync(__dirname + '/config/cert.key', 'utf8');
+// const certificate = fs.readFileSync(__dirname + '/config/cert.crt', 'utf8');
+// const credentials = { key: privateKey, cert: certificate };
+// const server = https.createServer(credentials, app);
+// server.listen(3000, () => { console.log('Server running on port 3000'); });
+
+const server = app.listen(3000, () => { console.log('Server running on port 3000'); });
+initializeNotificationWebSocketServer(server);

@@ -1,7 +1,45 @@
 <template>
     <div class="container">
         <h1>Talepler</h1>
-        <button @click="createTask" class="btn btn-success">Yeni Talep</button>
+        <button @click="createTask" class="btn btn-success">Talep Kaydet</button>
+
+        <div class="row">
+            <div class="col-md-3">
+                Proje
+                <select class="form-control mb-2" v-model="projectFilter" @change="filter">
+                    <option value="0">Tümü</option>
+                    <option v-for="project in getProjects" :key="project._id" :value="project._id">{{ project.name }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                Durum
+                <select class="form-control mb-2" v-model="statusFilter" @change="filter">
+                    <option value="0">Tümü</option>
+                    <option v-for="status in getTaskStatuses" :key="status._id" :value="status._id">{{ status.name }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                Öncelik
+                <select class="form-control mb-2" v-model="priorityFilter" @change="filter">
+                    <option value="0">Tümü</option>
+                    <option v-for="priority in getTaskPriorities" :key="priority._id" :value="priority._id">{{ priority.name
+                    }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                Tip
+                <select class="form-control mb-2" v-model="typeFilter" @change="filter">
+                    <option value="0">Tümü</option>
+                    <option v-for="type in getTaskTypes" :key="type._id" :value="type._id">{{ type.name }}
+                    </option>
+                </select>
+            </div>
+        </div>
+
+
         <table class="table table-striped" id="task-table">
             <thead>
                 <tr>
@@ -62,10 +100,10 @@ import 'datatables.net-responsive-dt';
 import { sent_reminder } from '../services/service'
 export default {
     mounted() {
-        this.$store.dispatch("tasks");
+        this.$store.dispatch("tasks", '0');
     },
     computed: {
-        ...mapGetters(["getTasks"])
+        ...mapGetters(["getTasks", "getTaskStatuses", "getTaskPriorities", "getTaskTypes", "getProjects", "getDepartments", "getUsers"])
     },
     watch: {
         getUsers() {
@@ -77,15 +115,29 @@ export default {
     data() {
         return {
             tasks: [],
-            selectedTask: null
+            selectedTask: null,
+            statusFilter: '0',
+            projectFilter: '0',
+            priorityFilter: '0',
+            typeFilter: '0'
         }
     },
     components: {
         CreateEditTaskComponent
     },
     methods: {
+        filter() {
+            let filter = '';
+            filter += `status=${this.statusFilter}&`;
+            filter += `related_project=${this.projectFilter}&`;
+            filter += `priority=${this.priorityFilter}&`;
+            filter += `type=${this.typeFilter}`;
+
+
+            this.$store.dispatch("tasks", filter);
+        },
         sentReminder(taskId) {
-            if(confirm("Hatırlatma göndermek istediğinize emin misiniz?")){
+            if (confirm("Hatırlatma göndermek istediğinize emin misiniz?")) {
                 sent_reminder({ taskId: taskId });
             }
         },

@@ -5,13 +5,19 @@ import { RouterLink, RouterView } from 'vue-router'
 <template>
   <div class="container">
     <div class="row mb-2">
-      <div class="col-md-4">
+      <div class="col-md-2">
         <RouterLink to="/login">Login</RouterLink>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
+        <RouterLink to="/projects">Projects</RouterLink>
+      </div>
+      <div class="col-md-2">
+        <RouterLink to="/departments">Departments</RouterLink>
+      </div>
+      <div class="col-md-2">
         <RouterLink to="/users">Users</RouterLink>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
         <RouterLink to="/tasks">Tasks</RouterLink>
       </div>
     </div>

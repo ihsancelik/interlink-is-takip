@@ -37,7 +37,7 @@
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Yeni Kullanıcı</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Yeni/Düzenle Kullanıcı</h5>
               </div>
               <div class="modal-body">
                     <CreateEditUserComponent :selectedUser="selectedUser"></CreateEditUserComponent>
@@ -77,6 +77,7 @@ export default {
     },
     methods: {
         newUser() {
+            this.selectedUser = null;
             $('#exampleModal').modal('show')
         },
         editUser(user) {
@@ -85,7 +86,6 @@ export default {
         },
         deleteUser(userId) {
             if (confirm("Silmek istediğinize emin misiniz?")) {
-                console.log(userId);
                 this.$store.dispatch("delete_user", { userId });
             }
         }

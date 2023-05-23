@@ -1,6 +1,9 @@
 const express = require('express')
 const router = express.Router()
-const { Conversation, File } = require('../db')
+const { Conversation, File, Task } = require('../db')
+const { sendConversationAddedMessageMail } = require('../services/mailer')
+const { addActivityLog } = require('../services/activity-log-service')
+const { taskActivityAction } = require('../constants/activityActionConstants')
 
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
@@ -49,6 +52,14 @@ router.post('/conversations/:taskId', upload.array('files'), async (req, res) =>
         }
 
         const savedConversation = await conversation.save()
+
+        const task = await Task.findById(task_id).populate('related_person');
+        const conversationCreator = await User.findById(created_from);
+        if (task.related_person._id != conversationCreator._id)
+            sendConversationAddedMessageMail(task.related_person, conversationCreator, task.title);
+
+        addActivityLog(created_from, task_id, taskActivityAction.COMMENT_ADDED, null);
+
         res.status(201).json(savedConversation)
     } catch (err) {
         console.error(err)

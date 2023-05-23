@@ -1,18 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const { User, Department } = require('../db');
+const { User, UserDevice, Department } = require('../db');
 const { generateToken } = require('../services/token-service');
 
 
 router.post('/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password, device_id } = req.body;
         let user = await User.findOne({ username: username, password: password });
 
         if (!user)
             return res.status(404).json({ message: 'User not found' });
 
-        const department = Department.findById(user.department);
+        if (!device_id)
+            return res.status(400).json({ message: 'Device id is required' });
+
+        if (!user.devices.includes(device_id)) {
+            const userDevice = await (new UserDevice({ device_id: device_id, user: user._id })).save();
+            user.devices.push(userDevice._id);
+        }
+
+        const department = await Department.findById(user.department);
         const token = generateToken(department._id, department.name, user._id, user.full_name, user.username);
         user.token = token;
         const savedUser = await user.save();

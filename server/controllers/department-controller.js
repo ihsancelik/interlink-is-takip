@@ -28,7 +28,7 @@ router.get('/departments/manager/:departmentId', async (req, res) => {
 
 router.post('/departments', async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name } = req.body.data;
         const department = new Department({ name });
         const savedDepartment = await department.save();
         res.status(201).json(savedDepartment);
@@ -41,7 +41,7 @@ router.post('/departments', async (req, res) => {
 router.put('/departments/:id', async (req, res) => {
     try {
         const departmentId = req.params.id;
-        const { name } = req.body;
+        const { name } = req.body.data;
 
         const updatedDepartment = await Department.findByIdAndUpdate(
             departmentId,

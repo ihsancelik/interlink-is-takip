@@ -15,7 +15,7 @@
                 <select v-model="related_person_id" class="form-select mb-2">
                     <option selected value="-1">İlgili Kişi Seçiniz</option>
                     <option v-for="user in getUsers" :key="user._id" :value="user._id">
-                        {{ user.full_name }}
+                        {{ user.full_name }} - {{ user.department.name }} - {{ user.role.name }}
                     </option>
                 </select>
             </div>
@@ -65,7 +65,8 @@
 
         <QuillEditorComponent theme="snow" toolbar="minimal" v-model:content="description" content-type="html"
             style="min-height: 250px;" placeholder="Açıklamayı detaylı bir şekilde giriniz!" />
-        <label style="font-style: italic;">* Eğer varsa eklemek istediğiniz dosyaları talebi oluşturduktan sonra detaylar kısmından ekleyebilirsiniz.</label>
+        <label style="font-style: italic;">* Eğer varsa eklemek istediğiniz dosyaları talebi oluşturduktan sonra detaylar
+            kısmından ekleyebilirsiniz.</label>
         <button @click="save" class="btn btn-success mt-2">Kaydet</button>
 
     </div>

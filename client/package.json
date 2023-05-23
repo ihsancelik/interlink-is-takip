@@ -19,6 +19,7 @@
     "datatables.net-select": "^1.6.2",
     "datatables.net-vue3": "^2.1.0",
     "dayjs": "^1.11.7",
+    "firebase": "^9.16.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",
     "vuex": "^4.1.0"
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
     "sass": "^1.62.1",
-    "vite": "^4.1.4"
+    "vite": "^4.1.4",
+    "vite-plugin-mkcert": "^1.15.0"
   }
 }

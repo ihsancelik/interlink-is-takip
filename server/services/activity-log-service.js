@@ -1,31 +1,43 @@
-const { ActivityLog, UserRole } = require('../db');
+const { TaskActivityLog, UserRole, Conversation, User, TaskActivityAction, TaskPriority, TaskStatus, TaskType } = require('../db');
 const { sendEmail } = require('./mailer');
 const dayjs = require('dayjs');
 const { taskActivityAction } = require('../constants/activityActionConstants');
+const { sendPushNotification } = require('./notification-service');
+const { isUserOnline, sendLiveNotification } = require('./notificationHub');
 
 async function getActivities(task_id, user_id) {
     let query = {};
+    if (task_id) query.task = task_id;
+    if (user_id) query.user = user_id;
 
-    if (task_id) query.task_id = task_id;
-    if (user_id) query.user_id = user_id;
-
-    return await ActivityLog.find(query).populate('task_id').populate('user_id');
+    return await TaskActivityLog.find(query).populate('task').populate('user');
 }
 
-async function addActivityLog(user, task, action, old_data, created_at) {
+async function addActivityLog(user, task, action, old_data) {
     try {
         action_message = getActionMessage(user, task, action);
 
-        const newActivityLog = new ActivityLog({ user, task, action, action_message, old_data, created_at });
+        const actionObject = TaskActivityAction.findOne({ name: action });
+
+        const newActivityLog = new TaskActivityLog({ user, task, actionObject, action_message, old_data: old_data });
         await newActivityLog.save();
 
-        sendEmailNotification(action, task, action_message);
-    } catch (error) {
+        const adminUser = await User.findOne({ username: 'admin' });
+        const conversationMessage = getActionMessageForConversation(user, action, task, old_data);
+        await (new Conversation({
+            task: task._id,
+            message: conversationMessage,
+            created_from: adminUser._id,
+        })).save();
 
+        sendEmailNotification(user, action, task, action_message);
+        sendActivityNotification(user, action, task, old_data)
+    } catch (error) {
+        console.error(error)
     }
 }
 
-function sendEmailNotification(action, task, action_message) {
+function sendEmailNotification(user, action, task, action_message) {
 
     if (action == taskActivityAction.REMINDER_SET) {
         const managerRoleId = UserRole.findOne({ name: 'yönetici' })._id;
@@ -38,36 +50,33 @@ function sendEmailNotification(action, task, action_message) {
         return;
     }
 
-    if (action == taskActivityAction.COMMENT_ADDED) {
+    if (action == taskActivityAction.COMMENT_ADDED || action == taskActivityAction.STATUS_CHANGED ||
+        action == taskActivityAction.PRIORITY_CHANGED || action == taskActivityAction.UPDATED ||
+        action == taskActivityAction.TYPE_CHANGED || action == taskActivityAction.PROJECT_CHANGED ||
+        action == taskActivityAction.CREATED) {
         const toMails = [task.related_person.email];
 
         sendEmail(user.email, action_message, toMails);
 
         return;
     }
+}
 
-    if (action == taskActivityAction.STATUS_CHANGED) {
-        const toMails = [task.related_person.email];
+function sendActivityNotification(user, action, task, oldTask) {
+    const title = 'INTERLINK İŞ-TAKİP';
+    const body = getActionMessageForConversation(user, action, task, oldTask);
 
-        sendEmail(user.email, action_message, toMails);
+    console.log(body);
 
-        return;
+    const userid = user._id;
+
+    // online kullanıcı varsa websocket üzerinden notification'ı iletir
+    if (isUserOnline(userid)) {
+        sendLiveNotification(userid, title, body);
     }
-
-    if (action == taskActivityAction.PRIORITY_CHANGED) {
-        const toMails = [task.related_person.email];
-
-        sendEmail(user.email, action_message, toMails);
-
-        return;
-    }
-
-    if (action == taskActivityAction.UPDATED) {
-        const toMails = [task.related_person.email];
-
-        sendEmail(user.email, action_message, toMails);
-
-        return;
+    // online kullanıcı yoksa google servisleri üzerinden notification'ı iletir
+    else {
+        sendPushNotification(userid, title, body);
     }
 }
 
@@ -81,7 +90,31 @@ function getActionMessage(user, task, action) {
     return message;
 }
 
+function getActionMessageForConversation(user, action, task, oldTask) {
+    let message = `${user.full_name} tarafından `;
+
+    if (action == taskActivityAction.PRIORITY_CHANGED) {
+        return message += `önceliği <s>${oldTask.priority.name}</s> ${task.priority.name} olarak değiştirildi.`
+    }
+
+    else if (action == taskActivityAction.PROJECT_CHANGED)
+        return message += `projesi <s>${oldTask.related_project.name}</s> ${task.related_project.name} olarak değiştirildi.`
+
+    else if (action == taskActivityAction.RELATED_PERSON_CHANGED)
+        return message += `ilgili kişisi <s>${oldTask.related_person.full_name}</s> ${task.related_person.full_name} olarak değiştirildi.`
+
+    else if (action == taskActivityAction.STATUS_CHANGED)
+        return message += `durumu <s>${oldTask.status.name}</s> ${task.status.name} olarak değiştirildi.`
+
+    else if (action == taskActivityAction.TYPE_CHANGED)
+        return message += `tipi <s>${oldTask.type.name}</s> ${task.type.name} olarak değiştirildi.`
+
+    else
+        return null;
+}
+
 module.exports = {
     getActivities,
-    addActivityLog
+    addActivityLog,
+    sendActivityNotification
 };

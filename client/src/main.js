@@ -7,6 +7,8 @@ import axios from 'axios'
 import './assets/main.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
+import { } from './services/push-notification-permission'
+
 const app = createApp(App)
 
 app.use(router)
@@ -63,11 +65,12 @@ const store = new createStore({
 
     },
     actions: {
-        async login({ commit }, { username, password }) {
+        async login({ commit }, { username, password, device_id }) {
             try {
                 const response = await axios.post('http://localhost:3000/login', {
                     username,
-                    password
+                    password,
+                    device_id
                 })
                 const user = response.data
                 commit('setUser', user)
@@ -112,6 +115,44 @@ const store = new createStore({
                 throw error;
             }
         },
+        async create_department({ commit }, { name }) {
+            try {
+                const token = JSON.parse(this.state.user).token;
+
+                const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+                const data = { name }
+                console.log(data)
+
+                await axios.post('http://localhost:3000/departments',
+                    { data: data },
+                    { headers: headers });
+
+                store.dispatch('departments');
+                return true;
+            } catch (error) {
+                console.error(error);
+                throw error;
+            }
+        },
+        async create_project({ commit }, { name }) {
+            try {
+                const token = JSON.parse(this.state.user).token;
+
+                const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+                const data = { name }
+                console.log(data)
+
+                await axios.post('http://localhost:3000/projects',
+                    { data: data },
+                    { headers: headers });
+
+                store.dispatch('projects');
+                return true;
+            } catch (error) {
+                console.error(error);
+                throw error;
+            }
+        },
         async edit_user({ commit }, { userId, full_name, email, gsm, username, password, departmentid, roleid }) {
             try {
                 const token = JSON.parse(this.state.user).token;
@@ -131,6 +172,44 @@ const store = new createStore({
                 throw error;
             }
         },
+        async edit_department({ commit }, { departmentId, name }) {
+            try {
+                const token = JSON.parse(this.state.user).token;
+
+                const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+                const data = { name }
+                console.log(data)
+
+                await axios.put('http://localhost:3000/departments/' + departmentId,
+                    { data: data },
+                    { headers: headers });
+
+                store.dispatch('departments');
+                return true;
+            } catch (error) {
+                console.error(error);
+                throw error;
+            }
+        },
+        async edit_project({ commit }, { projectId, name }) {
+            try {
+                const token = JSON.parse(this.state.user).token;
+
+                const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+                const data = { name }
+                console.log(data)
+
+                await axios.put('http://localhost:3000/projects/' + projectId,
+                    { data: data },
+                    { headers: headers });
+
+                store.dispatch('projects');
+                return true;
+            } catch (error) {
+                console.error(error);
+                throw error;
+            }
+        },
         async delete_user({ commit }, { userId }) {
             try {
                 const token = JSON.parse(this.state.user).token;
@@ -141,6 +220,22 @@ const store = new createStore({
                     { headers: headers });
 
                 store.dispatch('users');
+                return true;
+            } catch (error) {
+                console.error(error);
+                throw error;
+            }
+        },
+        async delete_project({ commit }, { projectId }) {
+            try {
+                const token = JSON.parse(this.state.user).token;
+
+                const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+
+                await axios.delete('http://localhost:3000/projects/' + projectId,
+                    { headers: headers });
+
+                store.dispatch('projects');
                 return true;
             } catch (error) {
                 console.error(error);
@@ -246,10 +341,10 @@ const store = new createStore({
             }
         },
 
-        async tasks({ commit }) {
+        async tasks({ commit }, query = '0') {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const tasks = await axios.get('http://localhost:3000/tasks', {
+                const tasks = await axios.get('http://localhost:3000/tasks/with-query/' + query, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
@@ -351,8 +446,8 @@ const store = new createStore({
         },
     },
     getters: {
-        isAuthenticated(state) {
-            return !!state.accessToken
+        getUser(state) {
+            return state.user
         },
         getUsers(state) {
             return state.users

@@ -32,6 +32,16 @@ const router = createRouter({
       component: () => import('../views/TasksView.vue')
     },
     {
+      path: '/departments',
+      name: 'departments',
+      component: () => import('../views/DepartmentsView.vue')
+    },
+    {
+      path: '/projects',
+      name: 'projects',
+      component: () => import('../views/ProjectsView.vue')
+    },
+    {
       path: '/conversations/:taskId',
       name: 'conversations',
       component: () => import('../views/ConversationsView.vue')

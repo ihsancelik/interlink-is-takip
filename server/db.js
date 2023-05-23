@@ -21,7 +21,14 @@ const userSchema = new Mongoose.Schema({
     gsm: { type: String, required: false, unique: false },
     token: { type: String, required: false },
     department: { type: Mongoose.Schema.Types.ObjectId, ref: 'Department' },
-    role: { type: Mongoose.Schema.Types.ObjectId, ref: 'UserRole' }
+    role: { type: Mongoose.Schema.Types.ObjectId, ref: 'UserRole' },
+    created_at: { type: Date, default: Date.now },
+    devices: [{ type: Mongoose.Schema.Types.ObjectId, ref: 'UserDevice' }]
+});
+
+const userDeviceSchema = new Mongoose.Schema({
+    device_id: { type: String, required: true, unique: true },
+    created_at: { type: Date, default: Date.now }
 });
 
 const userRoleSchema = new Mongoose.Schema({
@@ -93,6 +100,7 @@ const mailAccountSchema = new Mongoose.Schema({
 const Project = Mongoose.model('Project', projectSchema);
 const Department = Mongoose.model('Department', departmentSchema);
 const User = Mongoose.model('User', userSchema);
+const UserDevice = Mongoose.model('UserDevice', userDeviceSchema)
 const UserRole = Mongoose.model('UserRole', userRoleSchema);
 const Task = Mongoose.model('Task', taskSchema);
 const TaskStatus = Mongoose.model('TaskStatus', taskStatusSchema);
@@ -154,7 +162,7 @@ async function checkStaticDatas() {
     const adminUser = await User.findOne({ username: "admin" });
     if (!adminUser) {
         const newUser = new User({
-            full_name: "John Wick",
+            full_name: "SİSTEM",
             username: "admin",
             password: "admin",
             email: "admin@interlink.com.tr",
@@ -242,12 +250,27 @@ async function checkStaticDatas() {
             await newTaskActivityAction.save();
         }
     }
+
+    const mailAccountList = await MailAccount.find();
+    if (mailAccountList.length == 0) {
+        const newMailAccount = new MailAccount({
+            email: "operasyon@interlink.com.tr",
+            host: "webmail.interlink.com.tr",
+            port: 587,
+            secure: false,
+            username: "operasyon@interlink.com.tr",
+            password: "dstk@1881"
+        })
+        await newMailAccount.save();
+    }
+
 }
 
 module.exports = {
     Project,
     Department,
     User,
+    UserDevice,
     UserRole,
     Task,
     TaskStatus,

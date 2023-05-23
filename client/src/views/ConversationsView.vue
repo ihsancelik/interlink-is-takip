@@ -3,11 +3,40 @@
         <div class="col-md-3">
             <div class="card p-3">
                 <h3>Talep Bilgileri</h3>
-                <p>İlgili Kişi: {{ this.task?.related_person.full_name }}</p>
-                <p>Yönetici: {{ this.department_manager_full_name }}</p>
-                <p>Proje: {{ this.task?.related_project.name }} </p>
-                <p>Tip: {{ this.task?.type.name }}</p>
-                <p>Öncelik: {{ this.task?.priority.name }}</p>
+                Yönetici:
+                <p>{{ this.department_manager_full_name }}</p>
+
+                İlgili Kişi:
+                <select v-model="related_person_id" class="form-select mb-2" @change="changeRelatedPerson">
+                    <option selected value="-1">İlgili Kişi Seçiniz</option>
+                    <option v-for="relatedPerson in getUsers" :key="relatedPerson._id" :value="relatedPerson._id">
+                        {{ relatedPerson.full_name }} - {{ relatedPerson.department.name }} - {{ relatedPerson.role.name }}
+                    </option>
+                </select>
+
+                Proje:
+                <select v-model="project_id" class="form-select mb-2" @change="changeProject">
+                    <option selected value="-1">Proje Seçiniz</option>
+                    <option v-for="project in getProjects" :key="project._id" :value="project._id">
+                        {{ project.name }}
+                    </option>
+                </select>
+
+                Tip:
+                <select v-model="type_id" class="form-select mb-2" @change="changeTaskType">
+                    <option selected value="-1">Talep Tipi Seçiniz</option>
+                    <option v-for="type in getTaskTypes" :key="type._id" :value="type._id">
+                        {{ type.name }}
+                    </option>
+                </select>
+
+                Öncelik:
+                <select v-model="priority_id" class="form-select mb-2" @change="changeTaskPriority">
+                    <option selected value="-1">Öncelik Tipi Seçiniz</option>
+                    <option v-for="priority in getTaskPriorities" :key="priority._id" :value="priority._id">
+                        {{ priority.name }}
+                    </option>
+                </select>
 
                 Durum:
                 <select v-model="status_id" class="form-select mb-2" @change="changeTaskStatus">
@@ -57,12 +86,11 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { ref } from 'vue'
 import { department_manager, add_conversation } from '../services/service'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import ConversationMessage from "../components/conversations/ConversationMessage.vue"
-import { get_task, change_task_status } from "../services/service"
+import { get_task, change_task_status, change_task_priority, change_task_type, change_task_project, change_task_related_person } from "../services/service"
 import dayjs from "dayjs"
 export default {
     methods: {
@@ -81,11 +109,40 @@ export default {
             change_task_status({ taskId: this.taskId, status: this.status_id }).then(response => {
                 this.$store.dispatch("tasks");
             });
+        },
+        changeTaskPriority() {
+            change_task_priority({ taskId: this.taskId, priority: this.priority_id }).then(response => {
+                this.$store.dispatch("tasks");
+            });
+        },
+        changeTaskType() {
+            change_task_type({ taskId: this.taskId, type: this.type_id }).then(response => {
+                this.$store.dispatch("tasks");
+            });
+        },
+        changeProject() {
+            change_task_project({ taskId: this.taskId, project: this.project_id }).then(response => {
+                this.$store.dispatch("tasks");
+            });
+        },
+        changeRelatedPerson() {
+            change_task_related_person({ taskId: this.taskId, related_person: this.related_person_id }).then(response => {
+                this.$store.dispatch("tasks");
+            });
         }
+
     },
     mounted() {
         // get taskId from parameters
         this.taskId = this.$route.params.taskId;
+        this.$store.dispatch("taskStatuses");
+        this.$store.dispatch("taskPriorities");
+        this.$store.dispatch("taskTypes");
+        this.$store.dispatch("projects");
+        this.$store.dispatch("departments");
+        this.$store.dispatch("users");
+        this.$store.dispatch("conversations", { taskId: this.taskId });
+
         get_task({ taskId: this.taskId }).then(response => {
             this.task = response;
 
@@ -106,14 +163,16 @@ export default {
 
             this.related_person_full_name = this.task.related_person.full_name;
             this.status_id = this.task.status._id;
+            this.priority_id = this.task.priority._id;
+            this.type_id = this.task.type._id;
+            this.project_id = this.task.related_project._id;
+            this.department_id = this.task.related_department._id;
+            this.related_person_id = this.task.related_person._id;
 
         })
-
-        this.$store.dispatch("taskStatuses");
-        this.$store.dispatch("conversations", { taskId: this.taskId });
     },
     computed: {
-        ...mapGetters(["getConversations", "getTasks", "getTaskStatuses"]),
+        ...mapGetters(["getConversations", "getTasks", "getTaskStatuses", "getTaskPriorities", "getTaskTypes", "getProjects", "getDepartments", "getUsers"]),
         getDate() {
             return dayjs(this.task?.created_at).format("DD/MM/YYYY HH:mm:ss");
         },
@@ -128,6 +187,11 @@ export default {
             related_person_full_name: null,
             department_manager_full_name: null,
             status_id: -1,
+            priority_id: -1,
+            type_id: -1,
+            project_id: -1,
+            department_id: -1,
+            related_person_id: -1,
 
             taskConversations: [],
             files: [],
