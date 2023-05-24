@@ -15,17 +15,8 @@
     </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 export default {
     name: "LoginView",
-    computed: {
-        ...mapGetters(["getError"])
-    },
-    watch: {
-        getError() {
-            navigator.showErrorAlert(this.getError.error, 'danger');
-        }
-    },
     data() {
         return {
             username: "",
