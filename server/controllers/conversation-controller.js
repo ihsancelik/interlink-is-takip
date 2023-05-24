@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { Conversation, File, Task } = require('../db')
+const { Conversation, File, Task, User } = require('../db')
 const { sendConversationAddedMessageMail } = require('../services/mailer')
 const { addActivityLog } = require('../services/activity-log-service')
 const { taskActivityAction } = require('../constants/activityActionConstants')
@@ -9,7 +9,7 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 //conversation list
-router.get('/conversations/:taskId', async (req, res) => {
+router.get('/conversations/:taskId', async (req, res, next) => {
     try {
         const task_id = req.params.taskId;
         const conversations = await Conversation.find({ task: task_id })
@@ -19,12 +19,11 @@ router.get('/conversations/:taskId', async (req, res) => {
 
         res.json(conversations)
     } catch (err) {
-        console.error(err)
-        res.status(500).json({ message: 'Could not get conversations' })
+        next(err);
     }
 });
 
-router.post('/conversations/:taskId', upload.array('files'), async (req, res) => {
+router.post('/conversations/:taskId', upload.array('files'), async (req, res, next) => {
     try {
         const task_id = req.params.taskId;
         const message = req.body.message
@@ -58,17 +57,16 @@ router.post('/conversations/:taskId', upload.array('files'), async (req, res) =>
         if (task.related_person._id != conversationCreator._id)
             sendConversationAddedMessageMail(task.related_person, conversationCreator, task.title);
 
-        addActivityLog(created_from, task_id, taskActivityAction.COMMENT_ADDED, null);
+        addActivityLog(created_from, task_id, taskActivityAction.COMMENT_ADDED, null, savedConversation._id);
 
         res.status(201).json(savedConversation)
     } catch (err) {
-        console.error(err)
-        res.status(500).json({ message: 'Could not create conversation' })
+        next(err);
     }
 });
 
 
-router.put('/conversations/:id', upload.array('files'), async (req, res) => {
+router.put('/conversations/:id', upload.array('files'), async (req, res, next) => {
     try {
         const conversationId = req.params.id
         const { name, task_id } = req.body
@@ -103,14 +101,13 @@ router.put('/conversations/:id', upload.array('files'), async (req, res) => {
         const updatedConversation = await existingConversation.save();
         res.json(updatedConversation)
     } catch (err) {
-        console.error(err)
-        res.status(500).json({ message: 'Could not update conversation' })
+        next(err);
     }
 });
 
 
 
-router.delete('/conversations/:id', async (req, res) => {
+router.delete('/conversations/:id', async (req, res, next) => {
     try {
         const conversationId = req.params.id
         const deletedConversation = await Conversation.findByIdAndDelete(conversationId)
@@ -119,8 +116,7 @@ router.delete('/conversations/:id', async (req, res) => {
         }
         res.json(deletedConversation)
     } catch (err) {
-        console.error(err)
-        res.status(500).json({ message: 'Could not delete conversation' })
+        next(err);
     }
 });
 

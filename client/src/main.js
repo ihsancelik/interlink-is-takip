@@ -26,8 +26,12 @@ const store = new createStore({
         conversations: null,
         departmentManager: null,
         projects: null,
+        error: null
     },
     mutations: {
+        setError(state, error) {
+            state.error = error;
+        },
         setUser(state, user) {
             state.user = JSON.stringify(user)
             localStorage.setItem('user', JSON.stringify(user))
@@ -62,7 +66,6 @@ const store = new createStore({
         setProjects(state, projects) {
             state.projects = projects
         }
-
     },
     actions: {
         async login({ commit }, { username, password, device_id }) {
@@ -76,7 +79,10 @@ const store = new createStore({
                 commit('setUser', user)
                 return true
             } catch (error) {
-                console.error(error)
+                commit('setError', {
+                    type: 'login',
+                    error: error.response.data.message
+                })
                 return false
             }
         },
@@ -446,6 +452,9 @@ const store = new createStore({
         },
     },
     getters: {
+        getError(state) {
+            return state.error
+        },
         getUser(state) {
             return state.user
         },

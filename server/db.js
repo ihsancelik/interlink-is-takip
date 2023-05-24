@@ -27,7 +27,8 @@ const userSchema = new Mongoose.Schema({
 });
 
 const userDeviceSchema = new Mongoose.Schema({
-    device_id: { type: String, required: true, unique: true },
+    user: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
+    device_id: { type: String, required: true, unique: false },
     created_at: { type: Date, default: Date.now }
 });
 
@@ -85,6 +86,7 @@ const taskActivityLogSchema = new Mongoose.Schema({
     action: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskActivityAction' },
     action_message: { type: String, required: true },
     old_data: { type: String, required: false },
+    new_data: { type: String, required: false },
     created_at: { type: Date, default: Date.now }
 })
 
@@ -96,6 +98,13 @@ const mailAccountSchema = new Mongoose.Schema({
     username: { type: String, required: true },
     password: { type: String, required: true }
 })
+
+const systemExceptionLogSchema = new Mongoose.Schema({
+    message: { type: String, required: true },
+    stack: { type: String, required: true },
+    created_at: { type: Date, default: Date.now }
+})
+
 
 const Project = Mongoose.model('Project', projectSchema);
 const Department = Mongoose.model('Department', departmentSchema);
@@ -111,6 +120,7 @@ const File = Mongoose.model('File', fileSchema);
 const TaskActivityAction = Mongoose.model('TaskActivityActionSchema', taskActivityActionSchema);
 const TaskActivityLog = Mongoose.model('TaskActivityLog', taskActivityLogSchema);
 const MailAccount = Mongoose.model('MailAccount', mailAccountSchema);
+const SystemExceptionLog = Mongoose.model('SystemExceptionLog', systemExceptionLogSchema);
 
 Mongoose.connect("mongodb://localhost:27017/istakipdb")
     .then(() => {
@@ -280,5 +290,6 @@ module.exports = {
     File,
     TaskActivityAction,
     TaskActivityLog,
-    MailAccount
+    MailAccount,
+    SystemExceptionLog
 };

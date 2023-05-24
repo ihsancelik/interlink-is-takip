@@ -3,17 +3,17 @@ const router = express.Router();
 const { Department, User, UserRole } = require('../db');
 
 
-router.get('/users', async (req, res) => {
+router.get('/users', async (req, res, next) => {
     try {
         const users = await User.find().populate('department').populate('role');
         res.json(users);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not get users' });
+    }
+    catch (err) {
+        next(err);
     }
 });
 
-router.post('/users', async (req, res) => {
+router.post('/users', async (req, res, next) => {
     try {
         const { full_name, email, gsm, username, password, departmentid, roleid } = req.body.data;
 
@@ -40,13 +40,13 @@ router.post('/users', async (req, res) => {
 
         const savedUser = await user.save();
         res.status(201).json(savedUser);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not create user' });
+    }
+    catch (err) {
+        next(err);
     }
 });
 
-router.put('/users/:id', async (req, res) => {
+router.put('/users/:id', async (req, res, next) => {
     try {
         const userId = req.params.id;
         const { full_name, email, gsm, username, password, departmentid, roleid } = req.body.data;
@@ -79,13 +79,13 @@ router.put('/users/:id', async (req, res) => {
 
         const updatedUser = await existingUser.save();
         res.json(updatedUser);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not update user' });
+    }
+    catch (err) {
+        next(err);
     }
 });
 
-router.delete('/users/:id', async (req, res) => {
+router.delete('/users/:id', async (req, res, next) => {
     try {
         const userId = req.params.id;
 
@@ -94,9 +94,9 @@ router.delete('/users/:id', async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         res.json(deletedUser);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not delete user' });
+    }
+    catch (err) {
+        next(err);
     }
 });
 

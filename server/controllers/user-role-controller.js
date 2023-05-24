@@ -3,29 +3,29 @@ const router = express.Router();
 const { UserRole } = require('../db');
 
 //roles list
-router.get('/roles', async (req, res) => {
+router.get('/roles', async (req, res, next) => {
     try {
         const roles = await UserRole.find();
         res.json(roles);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not get roles' });
+    }
+    catch (err) {
+        next(err);
     }
 });
 
-router.post('/roles', async (req, res) => {
+router.post('/roles', async (req, res, next) => {
     try {
         const { name } = req.body;
         const role = new UserRole({ name });
         const savedRole = await role.save();
         res.status(201).json(savedRole);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not create role' });
+    }
+    catch (err) {
+        next(err);
     }
 });
 
-router.put('/roles/:id', async (req, res) => {
+router.put('/roles/:id', async (req, res, next) => {
     try {
         const roleId = req.params.id;
         const { name } = req.body;
@@ -39,14 +39,14 @@ router.put('/roles/:id', async (req, res) => {
             return res.status(404).json({ message: 'Role not found' });
         }
         res.json(updatedRole);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not update role' });
+    }
+    catch (err) {
+        next(err);
     }
 });
 
 
-router.delete('/roles/:id', async (req, res) => {
+router.delete('/roles/:id', async (req, res, next) => {
     try {
         const roleId = req.params.id;
         const deletedRole = await UserRole.findByIdAndDelete(roleId);
@@ -54,9 +54,9 @@ router.delete('/roles/:id', async (req, res) => {
             return res.status(404).json({ message: 'Role not found' });
         }
         res.json(deletedRole);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not delete role' });
+    }
+    catch (err) {
+        next(err);
     }
 });
 

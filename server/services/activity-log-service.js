@@ -13,25 +13,24 @@ async function getActivities(task_id, user_id) {
     return await TaskActivityLog.find(query).populate('task').populate('user');
 }
 
-async function addActivityLog(user, task, action, old_data) {
+async function addActivityLog(user, task, action, old_data, new_data) {
     try {
-        action_message = getActionMessage(user, task, action);
+        action_message = getActionMessage(user, task.title, task.created_at, action, old_data, new_data);
 
         const actionObject = TaskActivityAction.findOne({ name: action });
 
-        const newActivityLog = new TaskActivityLog({ user, task, actionObject, action_message, old_data: old_data });
+        const newActivityLog = new TaskActivityLog({ user, task, actionObject, action_message, old_data, new_data });
         await newActivityLog.save();
 
         const adminUser = await User.findOne({ username: 'admin' });
-        const conversationMessage = getActionMessageForConversation(user, action, task, old_data);
-        await (new Conversation({
-            task: task._id,
-            message: conversationMessage,
-            created_from: adminUser._id,
-        })).save();
-
-        sendEmailNotification(user, action, task, action_message);
-        sendActivityNotification(user, action, task, old_data)
+        const conversationMessage = getActionMessageForConversation(user, action, task, old_data, new_data);
+        if (conversationMessage) {
+            await (new Conversation({
+                task: task._id,
+                message: conversationMessage,
+                created_from: adminUser._id,
+            })).save();
+        }
     } catch (error) {
         console.error(error)
     }
@@ -81,36 +80,40 @@ function sendActivityNotification(user, action, task, oldTask) {
 }
 
 
-function getActionMessage(user, task, action) {
+function getActionMessage(user, taskTitle, taskCreatedAt, action, old_data, new_data) {
 
-    const title = task.title;
-    const datetime = dayjs(task.created_at).format("DD/MM/YYYY HH:mm:ss");
+    const title = taskTitle;
+    const datetime = dayjs(taskCreatedAt).format("DD/MM/YYYY HH:mm:ss");
 
-    const message = `${title} başlıklı talep ${datetime} tarihinde ${user.full_name} tarafından şu aksiyon alındı: ${action}.`
+    let message = `${title} başlıklı talep için ${datetime} tarihinde ${user.full_name} tarafından şu aksiyon alındı: ${action}. `
+    message += `<s>${old_data}</s> ${new_data} olarak değiştirildi.`
     return message;
 }
 
-function getActionMessageForConversation(user, action, task, oldTask) {
+function getActionMessageForConversation(user, action, task, old_data, new_data) {
     let message = `${user.full_name} tarafından `;
 
-    if (action == taskActivityAction.PRIORITY_CHANGED) {
-        return message += `önceliği <s>${oldTask.priority.name}</s> ${task.priority.name} olarak değiştirildi.`
-    }
+    if (action == taskActivityAction.PRIORITY_CHANGED)
+        message += "önceliği "
 
     else if (action == taskActivityAction.PROJECT_CHANGED)
-        return message += `projesi <s>${oldTask.related_project.name}</s> ${task.related_project.name} olarak değiştirildi.`
+        message += "projesi "
 
     else if (action == taskActivityAction.RELATED_PERSON_CHANGED)
-        return message += `ilgili kişisi <s>${oldTask.related_person.full_name}</s> ${task.related_person.full_name} olarak değiştirildi.`
+        message += "ilgili kişisi "
 
     else if (action == taskActivityAction.STATUS_CHANGED)
-        return message += `durumu <s>${oldTask.status.name}</s> ${task.status.name} olarak değiştirildi.`
+        message += "durumu "
 
     else if (action == taskActivityAction.TYPE_CHANGED)
-        return message += `tipi <s>${oldTask.type.name}</s> ${task.type.name} olarak değiştirildi.`
+        message += "tipi "
 
     else
         return null;
+
+    message += `<b><s>${old_data}</s> ${new_data}</b> olarak değiştirildi.`
+
+    return message;
 }
 
 module.exports = {

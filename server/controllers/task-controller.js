@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { Task, User, UserRole } = require('../db');
+const { Task, User, UserRole, TaskType, TaskPriority, TaskStatus, Project } = require('../db');
 const { addActivityLog } = require('../services/activity-log-service');
 const { taskActivityAction } = require('../constants/activityActionConstants');
 const { sendReminderMail, sendTaskCreatedMail } = require('../services/mailer')
 const { sendNotification } = require('../services/notification-service')
 
 // get task from id
-router.get('/tasks/:id', async (req, res) => {
+router.get('/tasks/:id', async (req, res, next) => {
     try {
         const taskId = req.params.id;
         const task = await Task.findById(taskId)
@@ -20,12 +20,11 @@ router.get('/tasks/:id', async (req, res) => {
             .populate('created_from')
         res.json(task);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not get task' });
+        next(err);
     }
 });
 
-router.get('/tasks/with-query/:queryString', async (req, res) => {
+router.get('/tasks/with-query/:queryString', async (req, res, next) => {
     try {
         let query = {};
 
@@ -78,12 +77,11 @@ router.get('/tasks/with-query/:queryString', async (req, res) => {
 
         res.json(tasks);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not get tasks' });
+        next(err);
     }
 });
 
-router.post('/tasks', async (req, res) => {
+router.post('/tasks', async (req, res, next) => {
     try {
         const { title, description, related_project, related_person, related_department, type, status, priority } = req.body.data;
         const created_from = req.auth.user_id;
@@ -97,170 +95,189 @@ router.post('/tasks', async (req, res) => {
 
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        addActivityLog(user, savedTask, taskActivityAction.CREATED, null);
+        addActivityLog(user, savedTask, taskActivityAction.CREATED, null, savedTask._id);
 
         savedTask.related_person.password = undefined;
         savedTask.created_from.password = undefined;
         res.status(201).json(savedTask);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not create task' });
+        next(err);
     }
 });
 
-router.put('/tasks/change-status/:taskId', async (req, res) => {
+router.put('/tasks/change-status/:taskId', async (req, res, next) => {
     const taskId = req.params.taskId;
     const { status } = req.body.data;
     try {
-        const task = await Task.findByIdAndUpdate(taskId);
+        const task = await Task.findByIdAndUpdate(taskId).populate('status');
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        const old_data = task;
+        const changed_status = await TaskStatus.findById(status);
+        if (!changed_status) {
+            return res.status(404).json({ message: 'Status not found' });
+        }
+
+        const old_data = task.status.name;
+        const new_data = changed_status.name;
 
         task.status = status;
-
         const updatedTask = await task.save();
 
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        addActivityLog(user, task, taskActivityAction.STATUS_CHANGED, old_data);
+        addActivityLog(user, task, taskActivityAction.STATUS_CHANGED, old_data, new_data);
 
         updatedTask.related_person.password = undefined;
         updatedTask.created_from.password = undefined;
         res.json(updatedTask);
-    }
-    catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not update task status' });
+    } catch (err) {
+        next(err);
     }
 });
 
 
-router.put('/tasks/change-priority/:taskId', async (req, res) => {
+router.put('/tasks/change-priority/:taskId', async (req, res, next) => {
     const taskId = req.params.taskId;
     const { priority } = req.body.data;
     try {
-        const task = await Task.findByIdAndUpdate(taskId);
+        const task = await Task.findByIdAndUpdate(taskId).populate('priority');
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        const old_data = task;
+        const changed_priority = await TaskPriority.findById(priority);
+        if (!changed_priority) {
+            return res.status(404).json({ message: 'Priority not found' });
+        }
+
+        const old_data = task.priority.name;
+        const new_data = changed_priority.name;
 
         task.priority = priority;
-
         const updatedTask = await task.save();
 
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        addActivityLog(user, task, taskActivityAction.PRIORITY_CHANGED, old_data);
+        addActivityLog(user, task, taskActivityAction.PRIORITY_CHANGED, old_data, new_data);
 
         updatedTask.related_person.password = undefined;
         updatedTask.created_from.password = undefined;
         res.json(updatedTask);
     }
     catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not update task status' });
+        next(err);
     }
 });
 
-router.put('/tasks/change-type/:taskId', async (req, res) => {
+router.put('/tasks/change-type/:taskId', async (req, res, next) => {
     const taskId = req.params.taskId;
     const { type } = req.body.data;
     try {
-        const task = await Task.findByIdAndUpdate(taskId);
+        const task = await Task.findByIdAndUpdate(taskId).populate('type');
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        const old_data = task;
+        const changed_type = await TaskType.findById(type);
+        if (!changed_type) {
+            return res.status(404).json({ message: 'Type not found' });
+        }
+
+        const old_data = task.type.name;
+        const new_data = changed_type.name;
+
 
         task.type = type;
-
         const updatedTask = await task.save();
 
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        addActivityLog(user, task, taskActivityAction.TYPE_CHANGED, old_data);
+        addActivityLog(user, task, taskActivityAction.TYPE_CHANGED, old_data, new_data);
 
         updatedTask.related_person.password = undefined;
         updatedTask.created_from.password = undefined;
         res.json(updatedTask);
     }
     catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not update task status' });
+        next(err);
     }
 });
 
-router.put('/tasks/change-project/:taskId', async (req, res) => {
+router.put('/tasks/change-project/:taskId', async (req, res, next) => {
     const taskId = req.params.taskId;
     const { project } = req.body.data;
     try {
-        const task = await Task.findByIdAndUpdate(taskId);
+        const task = await Task.findByIdAndUpdate(taskId).populate('related_project');
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        const old_data = task;
+        const changed_project = await Project.findById(project);
+        if (!changed_project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        const old_data = task.related_project.name;
+        const new_data = changed_project.name;
 
         task.related_project = project;
-
         const updatedTask = await task.save();
 
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        addActivityLog(user, task, taskActivityAction.PROJECT_CHANGED, old_data);
+        addActivityLog(user, task, taskActivityAction.PROJECT_CHANGED, old_data, new_data);
 
         updatedTask.related_person.password = undefined;
         updatedTask.created_from.password = undefined;
         res.json(updatedTask);
     }
     catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not update task status' });
+        next(err);
     }
 });
 
-router.put('/tasks/change-related-person/:taskId', async (req, res) => {
+router.put('/tasks/change-related-person/:taskId', async (req, res, next) => {
     const taskId = req.params.taskId;
     const { related_person } = req.body.data;
     try {
-        const task = await Task.findByIdAndUpdate(taskId);
+        const task = await Task.findByIdAndUpdate(taskId).populate('related_person');
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        const old_data = task;
+        const changed_user = await User.findById(related_person);
+        if (!changed_user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const old_data = task.related_person.full_name;
+        const new_data = changed_user.full_name;
 
         task.related_person = related_person;
-
         const updatedTask = await task.save();
 
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        addActivityLog(user, task, taskActivityAction.RELATED_PERSON_CHANGED, old_data);
+        addActivityLog(user, task, taskActivityAction.RELATED_PERSON_CHANGED, old_data, new_data);
 
         updatedTask.related_person.password = undefined;
         updatedTask.created_from.password = undefined;
         res.json(updatedTask);
     }
     catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not update task status' });
+        next(err);
     }
 });
 
 
-router.put('/tasks/:id', async (req, res) => {
+router.put('/tasks/:id', async (req, res, next) => {
     const id = req.params.id;
     const { title, description, related_person, related_project, related_department, type, status, priority } = req.body.data;
     try {
@@ -285,19 +302,19 @@ router.put('/tasks/:id', async (req, res) => {
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        addActivityLog(user, task, taskActivityAction.UPDATED, old_data);
+        //addActivityLog(user, task, taskActivityAction.UPDATED, old_data);
 
         updatedTask.related_person.password = undefined;
         updatedTask.created_from.password = undefined;
         res.json(updatedTask);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not update task' });
+    }
+    catch (err) {
+        next(err);
     }
 });
 
 
-router.delete('/tasks/:id', async (req, res) => {
+router.delete('/tasks/:id', async (req, res, next) => {
     try {
         const taskId = req.params.id;
         const deletedTask = await Task.findByIdAndDelete(taskId);
@@ -308,19 +325,19 @@ router.delete('/tasks/:id', async (req, res) => {
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        addActivityLog(user, task, taskActivityAction.DELETED, deletedTask);
+        //addActivityLog(user, task, taskActivityAction.DELETED, deletedTask);
 
         deletedTask.related_person.password = undefined;
         deletedTask.created_from.password = undefined;
         res.json(deletedTask);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not delete task' });
+    }
+    catch (err) {
+        next(err);
     }
 });
 
 
-router.get('/tasks/send-reminder/:taskId', async (req, res) => {
+router.get('/tasks/send-reminder/:taskId', async (req, res, next) => {
     const task_id = req.params.taskId;
     try {
         const task = await Task.findById(task_id)
@@ -340,13 +357,12 @@ router.get('/tasks/send-reminder/:taskId', async (req, res) => {
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        addActivityLog(user, task, taskActivityAction.REMINDER_SENT, null);
+        addActivityLog(user, task, taskActivityAction.REMINDER_SENT, null, null);
 
         res.status(200).json({ message: 'Reminder sent' });
     }
     catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not send reminder' });
+        next(err);
     }
 });
 

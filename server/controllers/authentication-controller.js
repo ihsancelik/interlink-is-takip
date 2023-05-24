@@ -4,18 +4,18 @@ const { User, UserDevice, Department } = require('../db');
 const { generateToken } = require('../services/token-service');
 
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
     try {
         const { username, password, device_id } = req.body;
-        let user = await User.findOne({ username: username, password: password });
+        let user = await User.findOne({ username: username, password: password }).populate('devices');
 
         if (!user)
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Kullanıcı adı veya şifren yanlış' });
 
         if (!device_id)
-            return res.status(400).json({ message: 'Device id is required' });
+            return res.status(400).json({ message: 'Bildirimlere izin vermeden sisteme giriş yapamazsın' });
 
-        if (!user.devices.includes(device_id)) {
+        if (user.devices.filter(d => d.device_id === device_id).length < 1) {
             const userDevice = await (new UserDevice({ device_id: device_id, user: user._id })).save();
             user.devices.push(userDevice._id);
         }
@@ -29,8 +29,7 @@ router.post('/login', async (req, res) => {
         user.password = undefined;
         res.json(user);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not login user' });
+        next(err);
     }
 });
 

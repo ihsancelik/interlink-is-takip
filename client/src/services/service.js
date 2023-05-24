@@ -148,7 +148,7 @@ export async function get_task({ taskId }) {
 export async function download_file({ virtualFileName, fileName }) {
     try {
         const token = JSON.parse(localStorage.getItem('user')).token;
-        const response = await axios.get('https://localhost:3000/storage/' + virtualFileName, {
+        const response = await axios.get('http://localhost:3000/storage/' + virtualFileName, {
             responseType: 'blob',
             headers: {
                 "Content-Type": "application/json",

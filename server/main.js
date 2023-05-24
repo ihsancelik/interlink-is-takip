@@ -48,6 +48,10 @@ app.use(projectController);
 app.use(storageController);
 
 
+const { logErrorMiddleware } = require('./middlewares/exception-logger-middleware');
+app.use(logErrorMiddleware);
+
+
 // start the https server. ca.crt and ca.key files are required on config folder for https
 // const https = require('https');
 // const privateKey = fs.readFileSync(__dirname + '/config/cert.key', 'utf8');

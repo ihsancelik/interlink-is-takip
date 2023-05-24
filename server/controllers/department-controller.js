@@ -3,17 +3,16 @@ const router = express.Router();
 const { Department, User, UserRole } = require('../db');
 
 //department list
-router.get('/departments', async (req, res) => {
+router.get('/departments', async (req, res, next) => {
     try {
         const departments = await Department.find();
         res.json(departments);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not get departments' });
+        next(err);
     }
 });
 
-router.get('/departments/manager/:departmentId', async (req, res) => {
+router.get('/departments/manager/:departmentId', async (req, res, next) => {
     try {
         const departmentId = req.params.departmentId;
         const managerRole = await UserRole.findOne({ name: 'yönetici' });
@@ -21,24 +20,22 @@ router.get('/departments/manager/:departmentId', async (req, res) => {
         user.password = undefined;
         res.json(user);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not get department manager' });
+        next(err);
     }
 });
 
-router.post('/departments', async (req, res) => {
+router.post('/departments', async (req, res, next) => {
     try {
         const { name } = req.body.data;
         const department = new Department({ name });
         const savedDepartment = await department.save();
         res.status(201).json(savedDepartment);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not create department' });
+        next(err);
     }
 });
 
-router.put('/departments/:id', async (req, res) => {
+router.put('/departments/:id', async (req, res, next) => {
     try {
         const departmentId = req.params.id;
         const { name } = req.body.data;
@@ -53,13 +50,12 @@ router.put('/departments/:id', async (req, res) => {
         }
         res.json(updatedDepartment);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not update department' });
+        next(err);
     }
 });
 
 
-router.delete('/departments/:id', async (req, res) => {
+router.delete('/departments/:id', async (req, res, next) => {
     try {
         const departmentId = req.params.id;
         const deletedDepartment = await Department.findByIdAndDelete(departmentId);
@@ -68,8 +64,7 @@ router.delete('/departments/:id', async (req, res) => {
         }
         res.json(deletedDepartment);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not delete department' });
+        next(err);
     }
 });
 

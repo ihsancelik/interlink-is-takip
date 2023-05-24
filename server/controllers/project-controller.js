@@ -2,29 +2,27 @@ const express = require('express');
 const router = express.Router();
 const { Project } = require('../db');
 
-router.get('/projects', async (req, res) => {
+router.get('/projects', async (req, res, next) => {
     try {
         const projects = await Project.find();
         res.json(projects);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not get projects' });
+        next(err);
     }
 });
 
-router.post('/projects', async (req, res) => {
+router.post('/projects', async (req, res, next) => {
     try {
         const { name } = req.body.data;
         const project = new Project({ name });
         const savedProject = await project.save();
         res.status(201).json(savedProject);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not create project' });
+        next(err);
     }
 });
 
-router.put('/projects/:id', async (req, res) => {
+router.put('/projects/:id', async (req, res, next) => {
     try {
         const projectId = req.params.id;
         const { name } = req.body.data;
@@ -39,13 +37,12 @@ router.put('/projects/:id', async (req, res) => {
         }
         res.json(updatedProject);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not update project' });
+        next(err);
     }
 });
 
 
-router.delete('/projects/:id', async (req, res) => {
+router.delete('/projects/:id', async (req, res, next) => {
     try {
         const projectId = req.params.id;
         const deletedProject = await Project.findByIdAndDelete(projectId);
@@ -54,8 +51,7 @@ router.delete('/projects/:id', async (req, res) => {
         }
         res.json(deletedProject);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Could not delete project' });
+        next(err);
     }
 });
 
