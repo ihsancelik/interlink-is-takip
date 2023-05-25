@@ -19,7 +19,12 @@ const store = new createStore({
     },
     mutations: {
         setError(state, error) {
-            navigator.showErrorAlert(error.error, 'danger');
+            if (error.status == 401 && window.location.href != '/login') {
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+                return false;
+            }
+            navigator.showErrorAlert(error.response.data.message, 'danger');
             state.error = error;
         },
         setUser(state, user) {
@@ -69,10 +74,7 @@ const store = new createStore({
                 commit('setUser', user)
                 return true
             } catch (error) {
-                commit('setError', {
-                    type: 'login',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 return false
             }
         },
@@ -88,11 +90,8 @@ const store = new createStore({
                 commit('setUsers', users.data);
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'users',
-                    error: error.response.data.message
-                })
-                return false;
+                commit('setError', error)
+                throw error;
             }
         },
         async create_user({ commit }, { full_name, email, gsm, username, password, departmentid, roleid }) {
@@ -110,10 +109,7 @@ const store = new createStore({
                 store.dispatch('users');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'create_user',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -132,10 +128,7 @@ const store = new createStore({
                 store.dispatch('departments');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'create_department',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -154,10 +147,7 @@ const store = new createStore({
                 store.dispatch('projects');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'create_project',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -176,10 +166,7 @@ const store = new createStore({
                 store.dispatch('users');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'edit_user',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -198,10 +185,7 @@ const store = new createStore({
                 store.dispatch('departments');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'edit_department',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -220,10 +204,7 @@ const store = new createStore({
                 store.dispatch('projects');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'edit_project',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -239,10 +220,7 @@ const store = new createStore({
                 store.dispatch('users');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'delete_user',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -258,10 +236,7 @@ const store = new createStore({
                 store.dispatch('projects');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'delete_project',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -277,10 +252,7 @@ const store = new createStore({
                 commit('setDepartments', departments.data);
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'departments',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 return false;
             }
         },
@@ -296,10 +268,7 @@ const store = new createStore({
                 commit('setRoles', roles.data);
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'roles',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 return false;
             }
         },
@@ -317,10 +286,7 @@ const store = new createStore({
                 commit('setTaskTypes', taskTypes.data);
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'taskTypes',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 return false;
             }
         },
@@ -336,10 +302,7 @@ const store = new createStore({
                 commit('setTaskStatuses', taskStatuses.data);
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'taskStatuses',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 return false;
             }
         },
@@ -355,10 +318,7 @@ const store = new createStore({
                 commit('setTaskPriorities', taskPriorities.data);
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'taskPriorities',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 return false;
             }
         },
@@ -374,10 +334,7 @@ const store = new createStore({
                 commit('setProjects', projects.data);
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'projects',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 return false;
             }
         },
@@ -394,10 +351,7 @@ const store = new createStore({
                 commit('setTasks', tasks.data);
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'tasks',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 return false;
             }
         },
@@ -416,10 +370,7 @@ const store = new createStore({
                 store.dispatch('tasks');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'create_task',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -437,10 +388,7 @@ const store = new createStore({
                 store.dispatch('tasks');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'edit_task',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -456,10 +404,7 @@ const store = new createStore({
                 store.dispatch('tasks');
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'delete_user',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 throw error;
             }
         },
@@ -477,10 +422,7 @@ const store = new createStore({
                 commit('setConversations', conversations.data);
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'conversations',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 return false;
             }
         },
@@ -496,10 +438,7 @@ const store = new createStore({
                 commit('setDepartmentManager', departmentManager.data);
                 return true;
             } catch (error) {
-                commit('setError', {
-                    type: 'department_manager',
-                    error: error.response.data.message
-                })
+                commit('setError', error)
                 return false;
             }
         },
@@ -543,7 +482,6 @@ const store = new createStore({
         }
     }
 });
-
 
 const serviceStore = {
     commit: store.commit,

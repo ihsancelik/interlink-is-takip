@@ -1,16 +1,22 @@
 <template>
     <div class="container">
-        <div class="card">
-            <div class="form-group">
-                <div class="text-center">
-                    <span style="font-size: xx-large"><b>InterLink</b> Destek</span>
-                </div>
-                <div class="m-5">
-                    <input class="form-control mb-2" v-model="username" type="text" placeholder="Kullanıcı Adı">
-                    <input class="form-control mb-2" v-model="password" type="password" placeholder="Şifre">
-                    <button class="btn btn-primary" @click="login">Giriş Yap</button>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="form-group">
+                        <div class="text-center">
+                            <span style="font-size: xx-large">Giriş Yap</span>
+                        </div>
+                        <div class="m-5">
+                            <input class="form-control mb-2" v-model="username" type="text" placeholder="Kullanıcı Adı">
+                            <input class="form-control mb-2" v-model="password" type="password" placeholder="Şifre">
+                            <button class="btn btn-primary" @click="login">Giriş Yap</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <div class="col-md-4"></div>
         </div>
     </div>
 </template>

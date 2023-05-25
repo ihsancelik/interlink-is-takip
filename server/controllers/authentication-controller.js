@@ -7,7 +7,7 @@ const { generateToken } = require('../services/token-service');
 router.post('/login', async (req, res, next) => {
     try {
         const { username, password, device_id } = req.body;
-        let user = await User.findOne({ username: username, password: password }).populate('devices');
+        let user = await User.findOne({ username: username, password: password }).populate('devices').populate('role');
 
         if (!user)
             return res.status(404).json({ message: 'Kullanıcı adı veya şifren yanlış' });

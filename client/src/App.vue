@@ -3,29 +3,80 @@ import { RouterLink, RouterView } from 'vue-router'
 </script>
 
 <template>
-  <div class="container">
-    <div class="row mb-2">
-      <div class="col-md-2">
-        <RouterLink to="/login">Login</RouterLink>
-      </div>
-      <div class="col-md-2">
-        <RouterLink to="/projects">Projects</RouterLink>
-      </div>
-      <div class="col-md-2">
-        <RouterLink to="/departments">Departments</RouterLink>
-      </div>
-      <div class="col-md-2">
-        <RouterLink to="/users">Users</RouterLink>
-      </div>
-      <div class="col-md-2">
-        <RouterLink to="/tasks">Tasks</RouterLink>
+  <nav class="navbar fixed-top navbar-light bg-light">
+    <div class="container-fluid">
+
+      <button v-if="loggedIn" class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+        aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <a class="navbar-brand" href="/tasks">
+        <span style="font-size: xx-large"><b>InterLink</b> Destek</span>
+      </a>
+      <button v-if="loggedIn" class="btn btn-danger" @click="logout">Logout</button>
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item" v-for="link in links">
+            <RouterLink :to="link.url" class="nav-link">{{ link.text }}</RouterLink>
+          </li>
+        </ul>
       </div>
     </div>
-    <div class="row">
-      <RouterView style="width: 100%;" />
-    </div>
+  </nav>
+
+  <div class="row m-5" style="padding-top: 50px">
+    <RouterView style="width: 100%; margin-top: 100px;" />
   </div>
 </template>
 
-<style>
-</style>
+
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  name: "App",
+  data() {
+    return {
+      links: [
+        { text: "Talepler", url: "/tasks" }],
+      loggedIn: false
+    }
+  },
+  computed: {
+    ...mapGetters(["getUser"])
+  },
+  watch: {
+    getUser() {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (user)
+        this.loggedIn = true;
+      else
+        this.loggedIn = false;
+
+      if (user.role.name === "admin") {
+        this.links = [
+          { text: "Talepler", url: "/tasks" },
+          { text: "Projeler", url: "/projects" },
+          { text: "Departmanlar", url: "/departments" },
+          { text: "Kullanıcılar", url: "/users" }
+        ]
+      }
+      else {
+        this.links = [
+          { text: "Talepler", url: "/tasks" }
+        ]
+      }
+    }
+  },
+  methods: {
+    logout() {
+      localStorage.removeItem("user");
+      this.$router.push({ name: 'login' })
+      this.links = [];
+      this.loggedIn = false;
+    },
+  }
+}
+</script>
+
+<style></style>
