@@ -12,10 +12,7 @@ export async function department_manager({ departmentId }) {
         });
         return departmentManager.data;
     } catch (error) {
-        store.commit('setError', {
-            type: 'department_manager',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         throw error;
     }
 }
@@ -31,10 +28,7 @@ export async function task_conversations({ taskId }) {
         });
         return conversations.data;
     } catch (error) {
-        store.commit('setError', {
-            type: 'task_conversation',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         throw error;
     }
 }
@@ -50,10 +44,7 @@ export async function add_conversation({ taskId, formData }) {
 
         return true;
     } catch (error) {
-        store.commit('setError', {
-            type: 'add_conversation',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         return Promise.reject(error);
     }
 }
@@ -70,10 +61,7 @@ export async function change_task_status({ taskId, status }) {
 
         return true;
     } catch (error) {
-        store.commit('setError', {
-            type: 'change_task_status',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         return Promise.reject(error);
     }
 }
@@ -89,10 +77,7 @@ export async function change_task_priority({ taskId, priority }) {
 
         return true;
     } catch (error) {
-        store.commit('setError', {
-            type: 'change_task_priority',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         return Promise.reject(error);
     }
 }
@@ -108,10 +93,7 @@ export async function change_task_type({ taskId, type }) {
 
         return true;
     } catch (error) {
-        store.commit('setError', {
-            type: 'change_task_type',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         return Promise.reject(error);
     }
 }
@@ -127,10 +109,7 @@ export async function change_task_project({ taskId, project }) {
 
         return true;
     } catch (error) {
-        store.commit('setError', {
-            type: 'change_task_project',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         return Promise.reject(error);
     }
 }
@@ -146,10 +125,7 @@ export async function change_task_related_person({ taskId, related_person }) {
 
         return true;
     } catch (error) {
-        store.commit('setError', {
-            type: 'change_task_related_person',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         return Promise.reject(error);
     }
 }
@@ -166,10 +142,7 @@ export async function get_task({ taskId }) {
         });
         return task.data;
     } catch (error) {
-        store.commit('setError', {
-            type: 'get_task',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         throw error;
     }
 }
@@ -193,10 +166,7 @@ export async function download_file({ virtualFileName, fileName }) {
         document.body.removeChild(link);
         return true;
     } catch (error) {
-        store.commit('setError', {
-            type: 'download_file',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         throw error;
     }
 }
@@ -211,10 +181,7 @@ export async function sent_reminder({ taskId }) {
 
         return true;
     } catch (error) {
-        store.commit('setError', {
-            type: 'sent_reminder',
-            error: error.response.data.message,
-        })
+        store.commit('setError', error);
         return Promise.reject(error);
     }
 }

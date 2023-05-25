@@ -121,9 +121,7 @@ export default {
                     roleid: this.roleid
                 }).then(() => {
                     $('#exampleModal').modal('hide')
-                }).catch((err) => {
-                    alert("Kullanıcı oluşturulamadı!\n" + err);
-                });
+                })
             }
 
         }

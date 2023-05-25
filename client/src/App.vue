@@ -3,7 +3,7 @@ import { RouterLink, RouterView } from 'vue-router'
 </script>
 
 <template>
-  <nav class="navbar fixed-top navbar-light bg-light">
+  <nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
 
       <button v-if="loggedIn" class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
@@ -24,8 +24,8 @@ import { RouterLink, RouterView } from 'vue-router'
     </div>
   </nav>
 
-  <div class="row m-5" style="padding-top: 50px">
-    <RouterView style="width: 100%; margin-top: 100px;" />
+  <div class="row m-3">
+    <RouterView style="width: 100%;" />
   </div>
 </template>
 
@@ -44,10 +44,17 @@ export default {
   computed: {
     ...mapGetters(["getUser"])
   },
+  created() {
+    this.initUI();
+  },
   watch: {
     getUser() {
+      this.initUI();
+    }
+  },
+  methods: {
+    initUI() {
       const user = JSON.parse(localStorage.getItem("user"));
-
       if (user)
         this.loggedIn = true;
       else
@@ -66,9 +73,7 @@ export default {
           { text: "Talepler", url: "/tasks" }
         ]
       }
-    }
-  },
-  methods: {
+    },
     logout() {
       localStorage.removeItem("user");
       this.$router.push({ name: 'login' })

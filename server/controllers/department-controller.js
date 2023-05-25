@@ -28,6 +28,11 @@ router.post('/departments', async (req, res, next) => {
     try {
         const { name } = req.body.data;
         const department = new Department({ name });
+
+        if (Department.find({ name: name })) {
+            return res.status(400).json({ message: 'Bu departman zaten mevcut' });
+        }
+
         const savedDepartment = await department.save();
         res.status(201).json(savedDepartment);
     } catch (err) {
@@ -39,6 +44,10 @@ router.put('/departments/:id', async (req, res, next) => {
     try {
         const departmentId = req.params.id;
         const { name } = req.body.data;
+
+        if (Department.find({ name: name, _id: { $ne: departmentId } })) {
+            return res.status(400).json({ message: 'Bu departman zaten mevcut' });
+        }
 
         const updatedDepartment = await Department.findByIdAndUpdate(
             departmentId,

@@ -28,6 +28,16 @@ router.post('/users', async (req, res, next) => {
             return res.status(400).json({ message: 'Role not found' });
         }
 
+        // check the username expect the current user
+        if (User.find({ username: username })) {
+            return res.status(400).json({ message: 'Bu kullanıcı adı zaten mevcut' });
+        }
+
+        // check the email expect the current user
+        if (User.find({ email: email })) {
+            return res.status(400).json({ message: 'Bu e-posta adresi zaten mevcut' });
+        }
+
         const user = new User({
             full_name,
             username,
@@ -55,6 +65,16 @@ router.put('/users/:id', async (req, res, next) => {
         let existingUser = await User.findById(userId);
         if (!existingUser) {
             return res.status(404).json({ message: 'User not found' });
+        }
+
+        // check the username expect the current user
+        if (User.find({ username: username, _id: { $ne: userId } })) {
+            return res.status(400).json({ message: 'Bu kullanıcı adı zaten mevcut' });
+        }
+
+        // check the email expect the current user
+        if (User.find({ email: email, _id: { $ne: userId } })) {
+            return res.status(400).json({ message: 'Bu e-posta adresi zaten mevcut' });
         }
 
 

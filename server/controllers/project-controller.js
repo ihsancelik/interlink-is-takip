@@ -14,6 +14,11 @@ router.get('/projects', async (req, res, next) => {
 router.post('/projects', async (req, res, next) => {
     try {
         const { name } = req.body.data;
+
+        if (Project.find({ name: name })) {
+            return res.status(400).json({ message: 'Bu proje zaten mevcut' });
+        }
+
         const project = new Project({ name });
         const savedProject = await project.save();
         res.status(201).json(savedProject);
@@ -26,6 +31,10 @@ router.put('/projects/:id', async (req, res, next) => {
     try {
         const projectId = req.params.id;
         const { name } = req.body.data;
+
+        if (Project.find({ name: name, _id: { $ne: projectId } })) {
+            return res.status(400).json({ message: 'Bu proje zaten mevcut' });
+        }
 
         const updatedProject = await Project.findByIdAndUpdate(
             projectId,
