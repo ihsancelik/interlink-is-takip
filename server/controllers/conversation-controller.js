@@ -4,6 +4,8 @@ const { Conversation, File, Task, User } = require('../db')
 const { sendConversationAddedMessageMail } = require('../services/mailer')
 const { addActivityLog } = require('../services/activity-log-service')
 const { taskActivityAction } = require('../constants/activityActionConstants')
+const { body, validationResult } = require('express-validator');
+const { get_errors_string } = require('../helpers/error-handler')
 
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
@@ -19,11 +21,18 @@ router.get('/conversations/:taskId', async (req, res, next) => {
 
         res.json(conversations)
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
-router.post('/conversations/:taskId', upload.array('files'), async (req, res, next) => {
+router.post('/conversations/:taskId', [
+    body('message').notEmpty().withMessage('Mesaj boş olamaz'),
+    body('message').isLength({ min: 1, max: 1000 }).withMessage('Mesaj uzunluğu 1 ile 1000 arasında olmalıdır'),
+], upload.array('files'), async (req, res, next) => {
     try {
         const task_id = req.params.taskId;
         const message = req.body.message
@@ -61,7 +70,11 @@ router.post('/conversations/:taskId', upload.array('files'), async (req, res, ne
 
         res.status(201).json(savedConversation)
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -101,7 +114,11 @@ router.put('/conversations/:id', upload.array('files'), async (req, res, next) =
         const updatedConversation = await existingConversation.save();
         res.json(updatedConversation)
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -110,13 +127,18 @@ router.put('/conversations/:id', upload.array('files'), async (req, res, next) =
 router.delete('/conversations/:id', async (req, res, next) => {
     try {
         const conversationId = req.params.id
-        const deletedConversation = await Conversation.findByIdAndDelete(conversationId)
+        const deletedConversation = await Conversation.findByIdAndDelete(conversationId);
         if (!deletedConversation) {
-            return res.status(404).json({ message: 'Conversation not found' })
+            return res.status(404).json({ message: 'Conversation not found' });
         }
+
         res.json(deletedConversation)
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 

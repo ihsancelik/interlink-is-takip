@@ -1,6 +1,6 @@
 import { createStore } from 'vuex';
 import axios from 'axios'
-
+import { api_url } from './helpers/constants.js';
 
 const store = new createStore({
     state: {
@@ -19,6 +19,7 @@ const store = new createStore({
     },
     mutations: {
         setError(state, error) {
+            console.log(error);
             if (error.status == 401 && window.location.href != '/login') {
                 localStorage.removeItem('user');
                 window.location.href = '/login';
@@ -65,7 +66,7 @@ const store = new createStore({
     actions: {
         async login({ commit }, { username, password, device_id }) {
             try {
-                const response = await axios.post('http://localhost:3000/login', {
+                const response = await axios.post(api_url + '/login', {
                     username,
                     password,
                     device_id
@@ -81,7 +82,7 @@ const store = new createStore({
         async users({ commit }) {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const users = await axios.get('http://localhost:3000/users', {
+                const users = await axios.get(api_url + '/users', {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
@@ -102,7 +103,7 @@ const store = new createStore({
                 const data = { full_name, email, gsm, username, password, departmentid, roleid }
                 console.log(data)
 
-                await axios.post('http://localhost:3000/users',
+                await axios.post(api_url + '/users',
                     { data: data },
                     { headers: headers });
 
@@ -121,7 +122,7 @@ const store = new createStore({
                 const data = { name }
                 console.log(data)
 
-                await axios.post('http://localhost:3000/departments',
+                await axios.post(api_url + '/departments',
                     { data: data },
                     { headers: headers });
 
@@ -140,7 +141,7 @@ const store = new createStore({
                 const data = { name }
                 console.log(data)
 
-                await axios.post('http://localhost:3000/projects',
+                await axios.post(api_url + '/projects',
                     { data: data },
                     { headers: headers });
 
@@ -159,7 +160,7 @@ const store = new createStore({
                 const data = { full_name, email, gsm, username, password, departmentid, roleid }
                 console.log(data)
 
-                await axios.put('http://localhost:3000/users/' + userId,
+                await axios.put(api_url + '/users/' + userId,
                     { data: data },
                     { headers: headers });
 
@@ -178,7 +179,7 @@ const store = new createStore({
                 const data = { name }
                 console.log(data)
 
-                await axios.put('http://localhost:3000/departments/' + departmentId,
+                await axios.put(api_url + '/departments/' + departmentId,
                     { data: data },
                     { headers: headers });
 
@@ -197,7 +198,7 @@ const store = new createStore({
                 const data = { name }
                 console.log(data)
 
-                await axios.put('http://localhost:3000/projects/' + projectId,
+                await axios.put(api_url + '/projects/' + projectId,
                     { data: data },
                     { headers: headers });
 
@@ -214,10 +215,26 @@ const store = new createStore({
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
 
-                await axios.delete('http://localhost:3000/users/' + userId,
+                await axios.delete(api_url + '/users/' + userId,
                     { headers: headers });
 
                 store.dispatch('users');
+                return true;
+            } catch (error) {
+                commit('setError', error)
+                throw error;
+            }
+        },
+        async delete_department({ commit }, { departmentId }) {
+            try {
+                const token = JSON.parse(this.state.user).token;
+
+                const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+
+                await axios.delete(api_url + '/departments/' + departmentId,
+                    { headers: headers });
+
+                store.dispatch('departments');
                 return true;
             } catch (error) {
                 commit('setError', error)
@@ -230,7 +247,7 @@ const store = new createStore({
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
 
-                await axios.delete('http://localhost:3000/projects/' + projectId,
+                await axios.delete(api_url + '/projects/' + projectId,
                     { headers: headers });
 
                 store.dispatch('projects');
@@ -243,7 +260,7 @@ const store = new createStore({
         async departments({ commit }) {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const departments = await axios.get('http://localhost:3000/departments', {
+                const departments = await axios.get(api_url + '/departments', {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
@@ -259,7 +276,7 @@ const store = new createStore({
         async roles({ commit }) {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const roles = await axios.get('http://localhost:3000/roles', {
+                const roles = await axios.get(api_url + '/roles', {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
@@ -277,7 +294,7 @@ const store = new createStore({
         async taskTypes({ commit }) {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const taskTypes = await axios.get('http://localhost:3000/task-types', {
+                const taskTypes = await axios.get(api_url + '/task-types', {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
@@ -293,7 +310,7 @@ const store = new createStore({
         async taskStatuses({ commit }) {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const taskStatuses = await axios.get('http://localhost:3000/task-statuses', {
+                const taskStatuses = await axios.get(api_url + '/task-statuses', {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
@@ -309,7 +326,7 @@ const store = new createStore({
         async taskPriorities({ commit }) {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const taskPriorities = await axios.get('http://localhost:3000/task-priorities', {
+                const taskPriorities = await axios.get(api_url + '/task-priorities', {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
@@ -325,7 +342,7 @@ const store = new createStore({
         async projects({ commit }) {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const projects = await axios.get('http://localhost:3000/projects', {
+                const projects = await axios.get(api_url + '/projects', {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
@@ -342,7 +359,7 @@ const store = new createStore({
         async tasks({ commit }, query = '0') {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const tasks = await axios.get('http://localhost:3000/tasks/with-query/' + query, {
+                const tasks = await axios.get(api_url + '/tasks/with-query/' + query, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
@@ -363,7 +380,7 @@ const store = new createStore({
                 const data = { title, description, related_project, related_person, related_department, type, status, priority }
                 console.log(data)
 
-                await axios.post('http://localhost:3000/tasks',
+                await axios.post(api_url + '/tasks',
                     { data: data },
                     { headers: headers });
 
@@ -381,7 +398,7 @@ const store = new createStore({
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
                 const data = { title, description, related_project, related_person, related_department, type, status, priority }
 
-                await axios.put('http://localhost:3000/tasks/' + taskId,
+                await axios.put(api_url + '/tasks/' + taskId,
                     { data: data },
                     { headers: headers });
 
@@ -392,13 +409,13 @@ const store = new createStore({
                 throw error;
             }
         },
-        async delete_user({ commit }, { taskId }) {
+        async delete_task({ commit }, { taskId }) {
             try {
                 const token = JSON.parse(this.state.user).token;
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
 
-                await axios.delete('http://localhost:3000/tasks/' + taskId,
+                await axios.delete(api_url + '/tasks/' + taskId,
                     { headers: headers });
 
                 store.dispatch('tasks');
@@ -413,7 +430,7 @@ const store = new createStore({
         async conversations({ commit }, { taskId }) {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const conversations = await axios.get('http://localhost:3000/conversations/' + taskId, {
+                const conversations = await axios.get(api_url + '/conversations/' + taskId, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
@@ -429,7 +446,7 @@ const store = new createStore({
         async department_manager({ commit }, { departmentId }) {
             try {
                 const token = JSON.parse(this.state.user).token;
-                const departmentManager = await axios.get('http://localhost:3000/departments/manager/' + departmentId, {
+                const departmentManager = await axios.get(api_url + '/departments/manager/' + departmentId, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`

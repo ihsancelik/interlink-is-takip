@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const { File } = require('../db');
+const { get_errors_string } = require('../helpers/error-handler')
 
 router.get('/storage/:virtualFileName', async (req, res, next) => {
     try {
@@ -10,7 +11,11 @@ router.get('/storage/:virtualFileName', async (req, res, next) => {
         const filePath = path.join(__dirname, '../uploads', virtualFileName);
         res.download(filePath, file_name);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 

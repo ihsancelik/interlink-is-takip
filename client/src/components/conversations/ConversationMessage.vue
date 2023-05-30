@@ -32,6 +32,7 @@
 import dayjs from 'dayjs'
 import 'dayjs/locale/tr' // Türkçe dil dosyası
 import { download_file } from "../../services/service"
+import { api_url } from '../../helpers/constants'
 export default {
     props: {
         conversation: {
@@ -60,7 +61,7 @@ export default {
             const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
             const isImage = imageExtensions.includes(fileExtension);
             if (isImage)
-                return `http://localhost:3000/${file.virtual_file_name}`;
+                return api_url + "/" + file.virtual_file_name;
             else
                 return `/images/file.png`;
         },

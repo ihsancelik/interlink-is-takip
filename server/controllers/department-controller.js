@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { Department, User, UserRole } = require('../db');
+const { body, validationResult } = require('express-validator');
+const { get_errors_string } = require('../helpers/error-handler')
 
 //department list
 router.get('/departments', async (req, res, next) => {
@@ -8,7 +10,11 @@ router.get('/departments', async (req, res, next) => {
         const departments = await Department.find();
         res.json(departments);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -20,32 +26,56 @@ router.get('/departments/manager/:departmentId', async (req, res, next) => {
         user.password = undefined;
         res.json(user);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
-router.post('/departments', async (req, res, next) => {
+router.post('/departments', [
+    body('data.name').notEmpty().withMessage('Departman adı boş bırakılamaz'),
+], async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const error = errors.array().map(e => '* ' + e.msg).join('\n');
+            return res.status(400).json({ message: error });
+        }
+
         const { name } = req.body.data;
         const department = new Department({ name });
 
-        if (Department.find({ name: name })) {
+        if ((await Department.find({ name: name })).length > 0) {
             return res.status(400).json({ message: 'Bu departman zaten mevcut' });
         }
 
         const savedDepartment = await department.save();
         res.status(201).json(savedDepartment);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
-router.put('/departments/:id', async (req, res, next) => {
+router.put('/departments/:id', [
+    body('data.name').notEmpty().withMessage('Departman adı boş bırakılamaz'),
+], async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const error = errors.array().map(e => '* ' + e.msg).join('\n');
+            return res.status(400).json({ message: error });
+        }
+
         const departmentId = req.params.id;
         const { name } = req.body.data;
 
-        if (Department.find({ name: name, _id: { $ne: departmentId } })) {
+        if (await Department.findOne({ name: name, _id: { $ne: departmentId } })) {
             return res.status(400).json({ message: 'Bu departman zaten mevcut' });
         }
 
@@ -59,7 +89,11 @@ router.put('/departments/:id', async (req, res, next) => {
         }
         res.json(updatedDepartment);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -73,7 +107,11 @@ router.delete('/departments/:id', async (req, res, next) => {
         }
         res.json(deletedDepartment);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 

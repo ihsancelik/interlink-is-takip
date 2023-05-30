@@ -66,6 +66,15 @@ export default {
                 this.departmentid = val.department._id;
                 this.roleid = val.role._id;
             }
+            else {
+                this.full_name = "";
+                this.email = "";
+                this.gsm = "";
+                this.username = "";
+                this.password = "";
+                this.departmentid = -1;
+                this.roleid = -1;
+            }
         }
     },
     mounted() {
@@ -88,12 +97,6 @@ export default {
     },
     methods: {
         save() {
-            if (!this.full_name || !this.username || !this.password || this.departmentid == -1 || this.roleid == -1
-                || !this.email || !this.gsm) {
-                alert("Lütfen tüm alanları doldurunuz!");
-                return;
-            }
-
             if (this.selectedUser === null) {
                 this.$store.dispatch("create_user", {
                     full_name: this.full_name,
@@ -105,8 +108,6 @@ export default {
                     roleid: this.roleid
                 }).then(() => {
                     $('#exampleModal').modal('hide')
-                }).catch((err) => {
-                    alert("Kullanıcı oluşturulamadı!\n" + err);
                 });
             }
             else {

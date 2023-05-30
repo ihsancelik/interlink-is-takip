@@ -1,4 +1,4 @@
-const { TaskActivityLog, UserRole, Conversation, User, TaskActivityAction, TaskPriority, TaskStatus, TaskType } = require('../db');
+const { TaskActivityLog, UserRole, Conversation, User, TaskActivityAction, TaskPriority, TaskStatus, TaskType, Task } = require('../db');
 const { sendEmail } = require('./mailer');
 const dayjs = require('dayjs');
 const { taskActivityAction } = require('../constants/activityActionConstants');
@@ -15,7 +15,9 @@ async function getActivities(task_id, user_id) {
 
 async function addActivityLog(user, task, action, old_data, new_data) {
     try {
-        action_message = getActionMessage(user, task.title, task.created_at, action, old_data, new_data);
+        const taskEntity = await Task.findById(task);
+        const userEntity = await User.findById(user);
+        action_message = getActionMessage(userEntity, taskEntity.title, taskEntity.created_at, action, old_data, new_data);
 
         const actionObject = TaskActivityAction.findOne({ name: action });
 
@@ -23,7 +25,7 @@ async function addActivityLog(user, task, action, old_data, new_data) {
         await newActivityLog.save();
 
         const adminUser = await User.findOne({ username: 'admin' });
-        const conversationMessage = getActionMessageForConversation(user, action, task, old_data, new_data);
+        const conversationMessage = getActionMessageForConversation(user, action, old_data, new_data);
         if (conversationMessage) {
             await (new Conversation({
                 task: task._id,
@@ -31,6 +33,9 @@ async function addActivityLog(user, task, action, old_data, new_data) {
                 created_from: adminUser._id,
             })).save();
         }
+
+        sendEmailNotification(user, action, taskEntity, action_message);
+
     } catch (error) {
         console.error(error)
     }
@@ -61,9 +66,9 @@ function sendEmailNotification(user, action, task, action_message) {
     }
 }
 
-function sendActivityNotification(user, action, task, oldTask) {
+function sendActivityNotification(user, action, oldTask) {
     const title = 'INTERLINK İŞ-TAKİP';
-    const body = getActionMessageForConversation(user, action, task, oldTask);
+    const body = getActionMessageForConversation(user, action, oldTask);
 
     console.log(body);
 
@@ -90,7 +95,7 @@ function getActionMessage(user, taskTitle, taskCreatedAt, action, old_data, new_
     return message;
 }
 
-function getActionMessageForConversation(user, action, task, old_data, new_data) {
+function getActionMessageForConversation(user, action, old_data, new_data) {
     let message = `${user.full_name} tarafından `;
 
     if (action == taskActivityAction.PRIORITY_CHANGED)
@@ -107,6 +112,12 @@ function getActionMessageForConversation(user, action, task, old_data, new_data)
 
     else if (action == taskActivityAction.TYPE_CHANGED)
         message += "tipi "
+
+    else if (action == taskActivityAction.UPDATED)
+        message += "güncellendi "
+
+    else if (action == taskActivityAction.COMMENT_ADDED)
+        message += "yorum yapıldı "
 
     else
         return null;

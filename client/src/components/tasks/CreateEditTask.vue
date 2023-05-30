@@ -135,12 +135,6 @@ export default {
     },
     methods: {
         save() {
-            if (this.title === "" || this.description === "" || this.type_id === -1 || this.status_id === -1 ||
-                this.priority_id === -1 || this.related_person_id === -1 || this.related_department_id === -1 || this.related_project_id === -1) {
-                alert("Lütfen tüm alanları doldurunuz!");
-                return;
-            }
-
             if (this.selectedTask === null) {
                 this.$store.dispatch("create_task", {
                     title: this.title,
@@ -152,9 +146,7 @@ export default {
                     related_person: this.related_person_id,
                     related_department: this.related_department_id
                 }).then(() => {
-                    $('#exampleModal').modal('hide')
-                }).catch((err) => {
-                    alert("Talep oluşturulamadı!\n" + err);
+                    $('#createEditTaskModal').modal('hide')
                 });
             }
             else {
@@ -169,9 +161,7 @@ export default {
                     related_person: this.related_person_id,
                     related_department: this.related_department_id
                 }).then(() => {
-                    $('#exampleModal').modal('hide')
-                }).catch((err) => {
-                    alert("Talep oluşturulamadı!\n" + err);
+                    $('#createEditTaskModal').modal('hide')
                 });
             }
 

@@ -21,6 +21,9 @@ export default {
             if (val != null) {
                 this.name = val.name
             }
+            else {
+                this.name = ""
+            }
         }
     },
     data() {
@@ -40,8 +43,6 @@ export default {
                     name: this.name
                 }).then(() => {
                     $('#exampleModal').modal('hide')
-                }).catch((err) => {
-                    alert("Proje oluşturulamadı!\n" + err);
                 });
             }
             else {
@@ -50,8 +51,6 @@ export default {
                     name: this.name
                 }).then(() => {
                     $('#exampleModal').modal('hide')
-                }).catch((err) => {
-                    alert("Proje oluşturulamadı!\n" + err);
                 });
             }
 

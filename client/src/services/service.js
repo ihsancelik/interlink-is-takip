@@ -1,10 +1,12 @@
 import axios from 'axios';
 import store from '../store';
+import { api_url } from '../helpers/constants';
+
 
 export async function department_manager({ departmentId }) {
     try {
         const token = JSON.parse(localStorage.getItem('user')).token;
-        const departmentManager = await axios.get('http://localhost:3000/departments/manager/' + departmentId, {
+        const departmentManager = await axios.get(api_url + '/departments/manager/' + departmentId, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`
@@ -20,7 +22,7 @@ export async function department_manager({ departmentId }) {
 export async function task_conversations({ taskId }) {
     try {
         const token = JSON.parse(localStorage.getItem('user')).token;
-        const conversations = await axios.get('http://localhost:3000/conversations/' + taskId, {
+        const conversations = await axios.get(api_url + '/conversations/' + taskId, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`
@@ -38,7 +40,7 @@ export async function add_conversation({ taskId, formData }) {
         const token = JSON.parse(localStorage.getItem('user')).token;
         const headers = { "Content-Type": "multipart/form-data", Authorization: `Bearer ${token}` }
 
-        await axios.post('http://localhost:3000/conversations/' + taskId,
+        await axios.post(api_url + '/conversations/' + taskId,
             formData,
             { headers: headers });
 
@@ -55,7 +57,7 @@ export async function change_task_status({ taskId, status }) {
         const token = JSON.parse(localStorage.getItem('user')).token;
         const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
         const data = { status: status }
-        await axios.put('http://localhost:3000/tasks/change-status/' + taskId,
+        await axios.put(api_url + '/tasks/change-status/' + taskId,
             { data: data },
             { headers: headers });
 
@@ -71,7 +73,7 @@ export async function change_task_priority({ taskId, priority }) {
         const token = JSON.parse(localStorage.getItem('user')).token;
         const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
         const data = { priority: priority }
-        await axios.put('http://localhost:3000/tasks/change-priority/' + taskId,
+        await axios.put(api_url + '/tasks/change-priority/' + taskId,
             { data: data },
             { headers: headers });
 
@@ -87,7 +89,7 @@ export async function change_task_type({ taskId, type }) {
         const token = JSON.parse(localStorage.getItem('user')).token;
         const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
         const data = { type: type }
-        await axios.put('http://localhost:3000/tasks/change-type/' + taskId,
+        await axios.put(api_url + '/tasks/change-type/' + taskId,
             { data: data },
             { headers: headers });
 
@@ -103,7 +105,7 @@ export async function change_task_project({ taskId, project }) {
         const token = JSON.parse(localStorage.getItem('user')).token;
         const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
         const data = { project: project }
-        await axios.put('http://localhost:3000/tasks/change-project/' + taskId,
+        await axios.put(api_url + '/tasks/change-project/' + taskId,
             { data: data },
             { headers: headers });
 
@@ -119,7 +121,7 @@ export async function change_task_related_person({ taskId, related_person }) {
         const token = JSON.parse(localStorage.getItem('user')).token;
         const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
         const data = { related_person: related_person }
-        await axios.put('http://localhost:3000/tasks/change-related-person/' + taskId,
+        await axios.put(api_url + '/tasks/change-related-person/' + taskId,
             { data: data },
             { headers: headers });
 
@@ -134,7 +136,7 @@ export async function change_task_related_person({ taskId, related_person }) {
 export async function get_task({ taskId }) {
     try {
         const token = JSON.parse(localStorage.getItem('user')).token;
-        const task = await axios.get('http://localhost:3000/tasks/' + taskId, {
+        const task = await axios.get(api_url + '/tasks/' + taskId, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`
@@ -150,7 +152,7 @@ export async function get_task({ taskId }) {
 export async function download_file({ virtualFileName, fileName }) {
     try {
         const token = JSON.parse(localStorage.getItem('user')).token;
-        const response = await axios.get('http://localhost:3000/storage/' + virtualFileName, {
+        const response = await axios.get(api_url + '/storage/' + virtualFileName, {
             responseType: 'blob',
             headers: {
                 "Content-Type": "application/json",
@@ -176,7 +178,7 @@ export async function sent_reminder({ taskId }) {
     try {
         const token = JSON.parse(localStorage.getItem('user')).token;
         const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-        await axios.get('http://localhost:3000/tasks/send-reminder/' + taskId,
+        await axios.get(api_url + '/tasks/send-reminder/' + taskId,
             { headers: headers });
 
         return true;

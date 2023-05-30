@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { User, UserDevice, Department } = require('../db');
 const { generateToken } = require('../services/token-service');
+const { get_errors_string } = require('../helpers/error-handler')
 
 
 router.post('/login', async (req, res, next) => {
@@ -29,7 +30,11 @@ router.post('/login', async (req, res, next) => {
         user.password = undefined;
         res.json(user);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 

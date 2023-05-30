@@ -58,11 +58,13 @@ const taskSchema = new Mongoose.Schema({
     status: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskStatus' },
     priority: { type: Mongoose.Schema.Types.ObjectId, ref: 'TaskPriority' },
     created_from: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },
-    created_at: { type: Date, default: Date.now }
+    created_at: { type: Date, default: Date.now },
+    deleted_at: { type: Date, required: false },
+    is_deleted: { type: Boolean, default: false },
 })
 
 const conversationSchema = new Mongoose.Schema({
-    message: { type: String, required: true },
+    message: { type: String, required: false },
     task: { type: Mongoose.Schema.Types.ObjectId, ref: 'Task' },
     files: [{ type: Mongoose.Schema.Types.ObjectId, ref: 'File' }],
     created_from: { type: Mongoose.Schema.Types.ObjectId, ref: 'User' },

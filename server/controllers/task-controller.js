@@ -4,6 +4,8 @@ const { Task, User, UserRole, TaskType, TaskPriority, TaskStatus, Project } = re
 const { addActivityLog } = require('../services/activity-log-service');
 const { taskActivityAction } = require('../constants/activityActionConstants');
 const { sendReminderMail, sendTaskCreatedMail } = require('../services/mailer')
+const { body, validationResult } = require('express-validator');
+const { get_errors_string } = require('../helpers/error-handler')
 const { sendNotification } = require('../services/notification-service')
 
 // get task from id
@@ -18,9 +20,17 @@ router.get('/tasks/:id', async (req, res, next) => {
             .populate('status')
             .populate('priority')
             .populate('created_from')
+
+        task.related_person.password = undefined;
+        task.created_from.password = undefined;
+
         res.json(task);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -38,9 +48,6 @@ router.get('/tasks/with-query/:queryString', async (req, res, next) => {
             });
         }
 
-        console.log(query);
-        console.log(queryVals);
-
         const managerRole = await UserRole.findOne({ name: 'yönetici' });
         const userRole = await UserRole.findOne({ name: 'kullanıcı' });
 
@@ -48,13 +55,13 @@ router.get('/tasks/with-query/:queryString', async (req, res, next) => {
         const user = await User.findById(req.auth.user_id);
 
         // Yönetici ise
-        if (user.role._id == managerRole._id) {
+        if (user.role._id.toString() == managerRole._id.toString()) {
             // Benim tarafımdan oluşturulmuşsa veya benim departmanımla ilişkiliyse
             query.$or = [{ created_from: user._id }, { related_department: user.department._id }];
         }
 
         // Kullanıcı ise
-        if (user.role._id == userRole._id) {
+        if (user.role._id.toString() === userRole._id.toString()) {
             // Benim tarafımdan oluşturulmuşsa veya benimle ilişkiliyse
             query.$or = [{ created_from: user._id }, { related_person: user._id }]
         }
@@ -77,12 +84,31 @@ router.get('/tasks/with-query/:queryString', async (req, res, next) => {
 
         res.json(tasks);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
-router.post('/tasks', async (req, res, next) => {
+router.post('/tasks', [
+    body('data.title').notEmpty().withMessage('Başlık boş bırakılamaz'),
+    body('data.description').notEmpty().withMessage('Açıklama boş bırakılamaz'),
+    body('data.related_project').custom(x => x !== "-1").withMessage('Proje boş bırakılamaz').notEmpty().withMessage('Proje boş bırakılamaz'),
+    body('data.related_person').custom(x => x !== "-1").withMessage('İlgili kişi boş bırakılamaz').notEmpty().withMessage('İlgili kişi boş bırakılamaz'),
+    body('data.related_department').custom(x => x !== "-1").withMessage('Departman boş bırakılamaz').notEmpty().withMessage('Departman boş bırakılamaz'),
+    body('data.type').custom(x => x !== "-1").withMessage('Tip boş bırakılamaz').notEmpty().withMessage('Tip boş bırakılamaz'),
+    body('data.status').custom(x => x !== "-1").withMessage('Durum boş bırakılamaz').notEmpty().withMessage('Durum boş bırakılamaz'),
+    body('data.priority').custom(x => x !== "-1").withMessage('Öncelik boş bırakılamaz').notEmpty().withMessage('Öncelik boş bırakılamaz')
+], async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const error = errors.array().map(e => '* ' + e.msg).join('\n');
+            return res.status(400).json({ message: error });
+        }
+
         const { title, description, related_project, related_person, related_department, type, status, priority } = req.body.data;
         const created_from = req.auth.user_id;
         const task = new Task({ title, description, related_project, related_person, related_department, type, status, priority, created_from });
@@ -101,11 +127,23 @@ router.post('/tasks', async (req, res, next) => {
         savedTask.created_from.password = undefined;
         res.status(201).json(savedTask);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
-router.put('/tasks/change-status/:taskId', async (req, res, next) => {
+router.put('/tasks/change-status/:taskId', [
+    body('data.status').notEmpty().withMessage('Durum boş bırakılamaz')
+], async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = errors.array().map(e => '* ' + e.msg).join('\n');
+        return res.status(400).json({ message: error });
+    }
+
     const taskId = req.params.taskId;
     const { status } = req.body.data;
     try {
@@ -134,12 +172,24 @@ router.put('/tasks/change-status/:taskId', async (req, res, next) => {
         updatedTask.created_from.password = undefined;
         res.json(updatedTask);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
 
-router.put('/tasks/change-priority/:taskId', async (req, res, next) => {
+router.put('/tasks/change-priority/:taskId', [
+    body('data.priority').notEmpty().withMessage('Öncelik boş bırakılamaz')
+], async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = errors.array().map(e => '* ' + e.msg).join('\n');
+        return res.status(400).json({ message: error });
+    }
+
     const taskId = req.params.taskId;
     const { priority } = req.body.data;
     try {
@@ -169,11 +219,23 @@ router.put('/tasks/change-priority/:taskId', async (req, res, next) => {
         res.json(updatedTask);
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
-router.put('/tasks/change-type/:taskId', async (req, res, next) => {
+router.put('/tasks/change-type/:taskId', [
+    body('data.type').notEmpty().withMessage('Tip boş bırakılamaz')
+], async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = errors.array().map(e => '* ' + e.msg).join('\n');
+        return res.status(400).json({ message: error });
+    }
+
     const taskId = req.params.taskId;
     const { type } = req.body.data;
     try {
@@ -204,11 +266,23 @@ router.put('/tasks/change-type/:taskId', async (req, res, next) => {
         res.json(updatedTask);
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
-router.put('/tasks/change-project/:taskId', async (req, res, next) => {
+router.put('/tasks/change-project/:taskId', [
+    body('data.project').notEmpty().withMessage('Proje boş bırakılamaz')
+], async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = errors.array().map(e => '* ' + e.msg).join('\n');
+        return res.status(400).json({ message: error });
+    }
+
     const taskId = req.params.taskId;
     const { project } = req.body.data;
     try {
@@ -238,11 +312,23 @@ router.put('/tasks/change-project/:taskId', async (req, res, next) => {
         res.json(updatedTask);
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
-router.put('/tasks/change-related-person/:taskId', async (req, res, next) => {
+router.put('/tasks/change-related-person/:taskId', [
+    body('data.related_person').notEmpty().withMessage('İlgili kişi boş bırakılamaz')
+], async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = errors.array().map(e => '* ' + e.msg).join('\n');
+        return res.status(400).json({ message: error });
+    }
+
     const taskId = req.params.taskId;
     const { related_person } = req.body.data;
     try {
@@ -272,12 +358,31 @@ router.put('/tasks/change-related-person/:taskId', async (req, res, next) => {
         res.json(updatedTask);
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
 
-router.put('/tasks/:id', async (req, res, next) => {
+router.put('/tasks/:id', [
+    body('data.title').notEmpty().withMessage('Başlık boş bırakılamaz'),
+    body('data.description').notEmpty().withMessage('Açıklama boş bırakılamaz'),
+    body('data.related_project').custom(x => x !== "-1").withMessage('Proje boş bırakılamaz').notEmpty().withMessage('Proje boş bırakılamaz'),
+    body('data.related_person').custom(x => x !== "-1").withMessage('İlgili kişi boş bırakılamaz').notEmpty().withMessage('İlgili kişi boş bırakılamaz'),
+    body('data.related_department').custom(x => x !== "-1").withMessage('Departman boş bırakılamaz').notEmpty().withMessage('Departman boş bırakılamaz'),
+    body('data.type').custom(x => x !== "-1").withMessage('Tip boş bırakılamaz').notEmpty().withMessage('Tip boş bırakılamaz'),
+    body('data.status').custom(x => x !== "-1").withMessage('Durum boş bırakılamaz').notEmpty().withMessage('Durum boş bırakılamaz'),
+    body('data.priority').custom(x => x !== "-1").withMessage('Öncelik boş bırakılamaz').notEmpty().withMessage('Öncelik boş bırakılamaz')
+], async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = errors.array().map(e => '* ' + e.msg).join('\n');
+        return res.status(400).json({ message: error });
+    }
+
     const id = req.params.id;
     const { title, description, related_person, related_project, related_department, type, status, priority } = req.body.data;
     try {
@@ -285,8 +390,6 @@ router.put('/tasks/:id', async (req, res, next) => {
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
-
-        const old_data = task;
 
         task.title = title;
         task.description = description;
@@ -309,7 +412,11 @@ router.put('/tasks/:id', async (req, res, next) => {
         res.json(updatedTask);
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -332,7 +439,11 @@ router.delete('/tasks/:id', async (req, res, next) => {
         res.json(deletedTask);
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -362,7 +473,11 @@ router.get('/tasks/send-reminder/:taskId', async (req, res, next) => {
         res.status(200).json({ message: 'Reminder sent' });
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 

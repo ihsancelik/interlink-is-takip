@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { UserRole } = require('../db');
+const { get_errors_string } = require('../helpers/error-handler')
 
 //roles list
 router.get('/roles', async (req, res, next) => {
@@ -9,7 +10,11 @@ router.get('/roles', async (req, res, next) => {
         res.json(roles);
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -21,7 +26,11 @@ router.post('/roles', async (req, res, next) => {
         res.status(201).json(savedRole);
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -41,7 +50,11 @@ router.put('/roles/:id', async (req, res, next) => {
         res.json(updatedRole);
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -56,7 +69,11 @@ router.delete('/roles/:id', async (req, res, next) => {
         res.json(deletedRole);
     }
     catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 

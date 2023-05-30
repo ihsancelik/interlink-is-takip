@@ -55,10 +55,14 @@ export default {
   methods: {
     initUI() {
       const user = JSON.parse(localStorage.getItem("user"));
+
       if (user)
         this.loggedIn = true;
-      else
+      else {
         this.loggedIn = false;
+        this.$router.push({ name: 'login' })
+        return;
+      }
 
       if (user.role.name === "admin") {
         this.links = [

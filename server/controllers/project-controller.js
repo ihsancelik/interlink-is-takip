@@ -1,21 +1,35 @@
 const express = require('express');
 const router = express.Router();
 const { Project } = require('../db');
+const { body, validationResult } = require('express-validator');
+const { get_errors_string } = require('../helpers/error-handler')
 
 router.get('/projects', async (req, res, next) => {
     try {
         const projects = await Project.find();
         res.json(projects);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
-router.post('/projects', async (req, res, next) => {
+router.post('/projects', [
+    body('data.name').notEmpty().withMessage('Proje adı boş olamaz'),
+], async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const error = errors.array().map(e => '* ' + e.msg).join('\n');
+            return res.status(400).json({ message: error });
+        }
+
         const { name } = req.body.data;
 
-        if (Project.find({ name: name })) {
+        if (await Project.findOne({ name: name })) {
             return res.status(400).json({ message: 'Bu proje zaten mevcut' });
         }
 
@@ -23,16 +37,28 @@ router.post('/projects', async (req, res, next) => {
         const savedProject = await project.save();
         res.status(201).json(savedProject);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
-router.put('/projects/:id', async (req, res, next) => {
+router.put('/projects/:id', [
+    body('data.name').notEmpty().withMessage('Proje adı boş olamaz'),
+], async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const error = errors.array().map(e => '* ' + e.msg).join('\n');
+            return res.status(400).json({ message: error });
+        }
+
         const projectId = req.params.id;
         const { name } = req.body.data;
 
-        if (Project.find({ name: name, _id: { $ne: projectId } })) {
+        if (await Project.findOne({ name: name, _id: { $ne: projectId } })) {
             return res.status(400).json({ message: 'Bu proje zaten mevcut' });
         }
 
@@ -46,7 +72,11 @@ router.put('/projects/:id', async (req, res, next) => {
         }
         res.json(updatedProject);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
@@ -60,7 +90,11 @@ router.delete('/projects/:id', async (req, res, next) => {
         }
         res.json(deletedProject);
     } catch (err) {
-        next(err);
+        next({
+            message: get_errors_string(err),
+            stack: err.stack,
+            status: 500
+        });
     }
 });
 
