@@ -66,7 +66,6 @@ export default {
                 return `/images/file.png`;
         },
         getDownloadFileName(file) {
-            console.log("sa")
             return file.file_name;
         }
     },

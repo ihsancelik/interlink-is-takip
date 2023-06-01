@@ -105,7 +105,6 @@ const store = new createStore({
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
                 const data = { full_name, email, gsm, username, password, departmentid, roleid }
-                console.log(data)
 
                 await axios.post(api_url + '/users',
                     { data: data },
@@ -124,7 +123,6 @@ const store = new createStore({
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
                 const data = { name }
-                console.log(data)
 
                 await axios.post(api_url + '/departments',
                     { data: data },
@@ -143,7 +141,6 @@ const store = new createStore({
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
                 const data = { name }
-                console.log(data)
 
                 await axios.post(api_url + '/projects',
                     { data: data },
@@ -162,7 +159,6 @@ const store = new createStore({
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
                 const data = { full_name, email, gsm, username, password, departmentid, roleid }
-                console.log(data)
 
                 await axios.put(api_url + '/users/' + userId,
                     { data: data },
@@ -181,7 +177,6 @@ const store = new createStore({
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
                 const data = { name }
-                console.log(data)
 
                 await axios.put(api_url + '/departments/' + departmentId,
                     { data: data },
@@ -200,7 +195,6 @@ const store = new createStore({
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
                 const data = { name }
-                console.log(data)
 
                 await axios.put(api_url + '/projects/' + projectId,
                     { data: data },
@@ -382,7 +376,6 @@ const store = new createStore({
 
                 const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
                 const data = { title, description, related_project, related_person, related_department, type, status, priority }
-                console.log(data)
 
                 const response = await axios.post(api_url + '/tasks',
                     { data: data },

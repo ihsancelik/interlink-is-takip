@@ -6,9 +6,12 @@
         <div class="row">
             <div class="col-md-3">
                 Proje
-                <select class="form-control mb-2" v-model="projectFilter" @change="filter">
-                    <option value="0">Tümü</option>
-                    <option v-for="project in getProjects" :key="project._id" :value="project._id">{{ project.name }}
+                <select id="projectSelect2" class="form-control mb-2">
+                    <option value="0">
+                        <span>Tümü</span>
+                    </option>
+                    <option v-for="project in getProjects" :value="project._id">
+                        <span>{{ project.name }}</span>
                     </option>
                 </select>
             </div>
@@ -69,9 +72,13 @@
 
                     <td>
                         <a href="javascript:void(0);" @click="openConversations(task._id)">Detaylar</a>&nbsp;
-                        <a href="javascript:void(0);" @click="editTask(task)">Düzenle</a>&nbsp;
-                        <a href="javascript:void(0);" @click="deleteTask(task._id)">Sil</a>&nbsp;
-                        <a href="javascript:void(0);" @click="sentReminder(task._id)">Hatırlatma Gönder</a>
+                        <a v-if="userid === task.created_from._id" href="javascript:void(0);"
+                            @click="editTask(task)">Düzenle</a>&nbsp;
+                        <a v-if="userid === task.created_from._id" href="javascript:void(0);"
+                            @click="deleteTask(task._id)">Sil</a>&nbsp;
+                        <a v-if="userid !== task.created_from._id" href="javascript:void(0);"
+                            @click="sentReminder(task._id)">Hatırlatma
+                            Gönder</a>
                     </td>
                 </tr>
             </tbody>
@@ -101,6 +108,13 @@ import { sent_reminder } from '../services/service'
 export default {
     mounted() {
         this.$store.dispatch("tasks", '0');
+        $("#projectSelect2").select2({
+            selectOnClose: true
+        });
+        $("#projectSelect2").on('select2:select', (e) => {
+            this.projectFilter = e.params.data.id;
+            this.filter();
+        });
     },
     computed: {
         ...mapGetters(["getTasks", "getTaskStatuses", "getTaskPriorities", "getTaskTypes", "getProjects", "getDepartments", "getUsers"])
@@ -114,6 +128,7 @@ export default {
     },
     data() {
         return {
+            userid: JSON.parse(this.$store.state.user)._id,
             tasks: [],
             selectedTask: null,
             statusFilter: '0',
@@ -151,7 +166,6 @@ export default {
         },
         deleteTask(taskId) {
             if (confirm("Silmek istediğinize emin misiniz?")) {
-                console.log(taskId);
                 this.$store.dispatch("delete_task", { taskId });
             }
         },

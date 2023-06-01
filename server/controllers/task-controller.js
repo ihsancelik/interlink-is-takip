@@ -393,6 +393,9 @@ router.put('/tasks/:id', [
             return res.status(404).json({ message: 'Task not found' });
         }
 
+        const old_title = task.title;
+        const old_description = task.description;
+
         task.title = title;
         task.description = description;
         task.related_person = related_person;
@@ -404,10 +407,16 @@ router.put('/tasks/:id', [
 
         const updatedTask = await task.save();
 
+        const new_title = updatedTask.title;
+        const new_description = updatedTask.description;
+
+        const old_data = `<br/>ESKİ BAŞLIK<br/>${old_title} <br/>ESKİ AÇIKLAMA <br/>${old_description}`;
+        const new_data = `<br/>YENİ BAŞLIK<br/>${new_title} <br/>YENİ AÇIKLAMA <br/>${new_description}`;
+
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        addActivityLog(user, task, taskActivityAction.UPDATED, old_data);
+        addActivityLog(user, task, taskActivityAction.UPDATED, old_data, new_data);
 
         updatedTask.related_person.password = undefined;
         updatedTask.created_from.password = undefined;

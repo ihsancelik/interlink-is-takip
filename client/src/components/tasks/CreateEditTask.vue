@@ -1,7 +1,7 @@
 <template>
     <div class="container">
 
-        <div class="row">
+        <div class="row" v-if="selectedTask === null">
             <div class="col-md-6">
                 <select v-model="related_department_id" class="form-select mb-2" aria-label="Rol">
                     <option selected value="-1">Departman Seçiniz</option>
@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="row" v-if="selectedTask === null">
             <div class="col-md-6">
                 <select v-model="related_project_id" class="form-select mb-2">
                     <option selected value="-1">Proje Seçiniz</option>
@@ -40,7 +40,7 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="row" v-if="selectedTask === null">
             <div class="col-md-6">
                 <select v-model="status_id" class="form-select mb-2">
                     <option selected value="-1">Durum Tipi Seçiniz</option>
@@ -66,7 +66,7 @@
         <QuillEditorComponent theme="snow" toolbar="minimal" v-model:content="description" content-type="html"
             style="min-height: 250px;" placeholder="Açıklamayı detaylı bir şekilde giriniz!" />
 
-        <div class="col-md-12">
+        <div v-if="selectedTask === null" class="col-md-12">
             <input type="file" ref="fileInput" multiple />
         </div>
         <button @click="save" class="btn btn-success mt-2">Kaydet</button>
@@ -130,7 +130,8 @@ export default {
             priority_id: -1,
             related_person_id: -1,
             related_department_id: -1,
-            related_project_id: -1
+            related_project_id: -1,
+            onlyShowTitleDescription: false
         }
     },
     components: {

@@ -122,7 +122,7 @@ function getActionMessageForConversation(user, action, old_data, new_data) {
     else
         return null;
 
-    message += `<b><s>${old_data}</s> ${new_data}</b> olarak değiştirildi.`
+    message += `<s>${old_data}</s> ${new_data} olarak değiştirildi.`
 
     return message;
 }
