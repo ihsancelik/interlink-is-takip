@@ -102,7 +102,7 @@ const mailAccountSchema = new Mongoose.Schema({
 })
 
 const systemExceptionLogSchema = new Mongoose.Schema({
-    message: { type: String, required: true },
+    message: { type: String, required: false },
     stack: { type: String, required: true },
     created_at: { type: Date, default: Date.now }
 })

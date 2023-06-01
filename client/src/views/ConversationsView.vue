@@ -194,7 +194,6 @@ export default {
             related_person_id: -1,
 
             taskConversations: [],
-            files: [],
             message: "",
             showAnswerArea: false,
             answerAreaTitle: ""

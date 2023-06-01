@@ -15,7 +15,8 @@ const store = new createStore({
         conversations: null,
         departmentManager: null,
         projects: null,
-        error: null
+        error: null,
+        createdTaskId: null
     },
     mutations: {
         setError(state, error) {
@@ -61,6 +62,9 @@ const store = new createStore({
         },
         setProjects(state, projects) {
             state.projects = projects
+        },
+        setCreatedTaskId(state, createdTaskId) {
+            state.createdTaskId = createdTaskId
         }
     },
     actions: {
@@ -380,9 +384,12 @@ const store = new createStore({
                 const data = { title, description, related_project, related_person, related_department, type, status, priority }
                 console.log(data)
 
-                await axios.post(api_url + '/tasks',
+                const response = await axios.post(api_url + '/tasks',
                     { data: data },
                     { headers: headers });
+
+                const createdTaskId = response.data._id;
+                commit('setCreatedTaskId', createdTaskId);
 
                 store.dispatch('tasks');
                 return true;
@@ -496,6 +503,9 @@ const store = new createStore({
         },
         getProjects(state) {
             return state.projects
+        },
+        getCreatedTaskId(state) {
+            return state.createdTaskId
         }
     }
 });

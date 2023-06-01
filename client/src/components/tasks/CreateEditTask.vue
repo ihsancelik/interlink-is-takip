@@ -65,8 +65,10 @@
 
         <QuillEditorComponent theme="snow" toolbar="minimal" v-model:content="description" content-type="html"
             style="min-height: 250px;" placeholder="Açıklamayı detaylı bir şekilde giriniz!" />
-        <label style="font-style: italic;">* Eğer varsa eklemek istediğiniz dosyaları talebi oluşturduktan sonra detaylar
-            kısmından ekleyebilirsiniz.</label>
+
+        <div class="col-md-12">
+            <input type="file" ref="fileInput" multiple />
+        </div>
         <button @click="save" class="btn btn-success mt-2">Kaydet</button>
 
     </div>
@@ -75,6 +77,7 @@
 import { mapGetters } from 'vuex'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import { add_conversation } from '../../services/service'
 export default {
     props: {
         selectedTask: {
@@ -146,6 +149,16 @@ export default {
                     related_person: this.related_person_id,
                     related_department: this.related_department_id
                 }).then(() => {
+                    const files = this.$refs.fileInput.files;
+                    if (files.length > 0) {
+                        const createdTaskId = this.$store.state.createdTaskId;
+                        const formData = new FormData();
+                        formData.append('message', '');
+                        for (let i = 0; i < files.length; i++) {
+                            formData.append('files', files[i]);
+                        }
+                        add_conversation({ taskId: createdTaskId, formData: formData });
+                    }
                     $('#createEditTaskModal').modal('hide')
                 });
             }

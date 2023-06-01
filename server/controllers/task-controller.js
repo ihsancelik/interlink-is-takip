@@ -66,6 +66,8 @@ router.get('/tasks/with-query/:queryString', async (req, res, next) => {
             query.$or = [{ created_from: user._id }, { related_person: user._id }]
         }
 
+        query.$and = [{ is_deleted: false }];
+
         const tasks = await Task.find(query)
             .sort({ created_at: 'desc' })
             .populate('related_project')
@@ -405,7 +407,7 @@ router.put('/tasks/:id', [
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        //addActivityLog(user, task, taskActivityAction.UPDATED, old_data);
+        addActivityLog(user, task, taskActivityAction.UPDATED, old_data);
 
         updatedTask.related_person.password = undefined;
         updatedTask.created_from.password = undefined;
@@ -424,15 +426,18 @@ router.put('/tasks/:id', [
 router.delete('/tasks/:id', async (req, res, next) => {
     try {
         const taskId = req.params.id;
-        const deletedTask = await Task.findByIdAndDelete(taskId);
-        if (!deletedTask) {
+        const task = await Task.findById(taskId);
+        if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
+
+        task.is_deleted = true;
+        const deletedTask = await task.save();
 
         // Activity Log
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);
-        //addActivityLog(user, task, taskActivityAction.DELETED, deletedTask);
+        addActivityLog(user, deletedTask, taskActivityAction.DELETED, null, null);
 
         deletedTask.related_person.password = undefined;
         deletedTask.created_from.password = undefined;

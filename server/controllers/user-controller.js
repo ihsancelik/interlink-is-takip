@@ -9,9 +9,6 @@ const { get_errors_string } = require('../helpers/error-handler')
 router.get('/users', async (req, res, next) => {
     try {
         const users = await User.find().populate('department').populate('role');
-        users.forEach(user => {
-            user.password = undefined;
-        });
         res.json(users);
     }
     catch (err) {

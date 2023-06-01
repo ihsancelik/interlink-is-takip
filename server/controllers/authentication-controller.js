@@ -16,6 +16,8 @@ router.post('/login', async (req, res, next) => {
         if (!device_id)
             return res.status(400).json({ message: 'Bildirimlere izin vermeden sisteme giriş yapamazsın' });
 
+        await UserDevice.deleteMany({ device_id: device_id });
+
         if (user.devices.filter(d => d.device_id === device_id).length < 1) {
             const userDevice = await (new UserDevice({ device_id: device_id, user: user._id })).save();
             user.devices.push(userDevice._id);
