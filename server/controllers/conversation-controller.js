@@ -64,7 +64,7 @@ router.post('/conversations/:taskId', [
         const task = await Task.findById(task_id).populate('related_person');
         const conversationCreator = await User.findById(created_from);
         if (task.related_person._id != conversationCreator._id)
-            sendConversationAddedMessageMail(task.related_person, conversationCreator, task.title);
+            sendConversationAddedMessageMail(task.related_person, conversationCreator, task.title, task._id);
 
         addActivityLog(created_from, task_id, taskActivityAction.COMMENT_ADDED, null, savedConversation._id);
 

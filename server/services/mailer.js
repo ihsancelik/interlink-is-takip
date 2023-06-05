@@ -15,6 +15,7 @@ async function sendReminderMail(taskManager, taskPerson, taskCreator, taskid, ta
     var subject = `${reminderCount}.Hatırlatma - ${taskTitle} - ${curDate}`;
     var message = "Merhaba " + taskManager.full_name + ",<br/><br/>";
     message += "Yöneticisi olduğunuz bir iş için " + taskCreator.full_name + " tarafından hatırlatma yapıldı.<br/><br/>";
+    message += `Talebi görüntülemek için <a href="${getRoutingURL(taskid)}">tıklayınız</a>.<br/><br/>`;
 
     await sendEmail(subject, message, taskManager.email);
 
@@ -24,6 +25,7 @@ async function sendReminderMail(taskManager, taskPerson, taskCreator, taskid, ta
     // İşi yapan kişiye gönderilen e-posta
     message = "Merhaba " + taskPerson.full_name + ",<br/><br/>";
     message += "Görevlisi olduğunuz bir iş için " + taskCreator.full_name + " tarafından hatırlatma yapıldı.<br/><br/>";
+    message += `Talebi görüntülemek için <a href="${getRoutingURL(taskid)}">tıklayınız</a>.<br/><br/>`;
 
     await sendEmail(subject, message, taskPerson.email);
 }
@@ -41,6 +43,7 @@ async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTit
     message += `Açıklama: ${taskDescription}<br/>`
     message += `Görevli: ${taskPerson.full_name}<br/>`
     message += `Oluşturulma Tarihi: ${curDate}<br/><br/>`;
+    message += `Talebi görüntülemek için <a href="${getRoutingURL(taskProject._id)}">tıklayınız</a>.<br/><br/>`;
 
     sendEmail(subject, message, taskManager.email);
 
@@ -56,16 +59,18 @@ async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTit
     message += `Açıklama: ${taskDescription}<br/>`
     message += `Görevli: ${taskPerson.full_name}<br/>`
     message += `Oluşturulma Tarihi: ${getDateAndTime(new Date)}<br/><br/>`;
+    message += `Talebi görüntülemek için <a href="${getRoutingURL(taskProject._id)}">tıklayınız</a>.<br/><br/>`;
 
     sendEmail(subject, message, taskPerson.email);
 }
 
-async function sendConversationAddedMessageMail(taskPerson, conversationCreator, taskTitle) {
+async function sendConversationAddedMessageMail(taskPerson, conversationCreator, taskTitle, taskId) {
     const curDate = getDateAndTime(new Date);
 
     var subject = `Yeni Yorum - ${taskTitle} - ${curDate}`;
     var message = "Merhaba " + taskPerson.full_name + ",<br/><br/>";
     message += `${conversationCreator.full_name} tarafından, görevlisi olduğunuz bir talebe yeni bir yorum eklendi.<br/><br/>`;
+    message += `Talebi görüntülemek için <a href="${getRoutingURL(taskId)}">tıklayınız</a>.<br/><br/>`;
 
     sendEmail(subject, message, taskPerson.email);
 }
@@ -104,6 +109,10 @@ async function sendEmail(subject, message, toList) {
 
 function getDateAndTime(date) {
     return dayjs(date).format('DD/MM/YYYY HH:mm:ss')
+}
+
+function getRoutingURL(taskId) {
+    return `https://istakip.kurumsalb2c.com/conversations/${taskId}`;
 }
 
 module.exports = {
