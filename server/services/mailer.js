@@ -3,6 +3,7 @@ const util = require('util');
 const { MailAccount, TaskActivityLog } = require('../db');
 const { taskActivityAction } = require('../constants/activityActionConstants');
 const { sendNotification } = require('../services/notification-service')
+const dayjs = require('dayjs');
 
 async function sendReminderMail(taskManager, taskPerson, taskCreator, taskid, taskTitle) {
     // İş için daha önce kaç defa hatırlatma yapıldığını bul
@@ -25,11 +26,16 @@ async function sendReminderMail(taskManager, taskPerson, taskCreator, taskid, ta
     await sendEmail(subject, message, taskPerson.email);
 }
 
-async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTitle) {
+async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTitle, taskDescription) {
     // Yöneticiye gönderilen e-posta
     var subject = `Yeni Talep - ${taskTitle}`;
-    var message = "Merhaba " + taskManager.full_name + ",<br/><br/>";
+    var message = `Merhaba ${taskManager.full_name}, <br/><br/>`;
     message += `${taskCreator.full_name} tarafından, yöneticisi olduğunuz departman için bir talep oluşturuldu.<br/><br/>`;
+
+    message += `Başlık: ${taskTitle}<br/>`;
+    message += `Açıklama: ${taskDescription}<br/>`
+    message += `Görevli: ${taskPerson.full_name}<br/>`
+    message += `Oluşturulma Tarihi: ${getDateAndTime(new Date)}<br/><br/>`;
 
     sendEmail(subject, message, taskManager.email);
 
@@ -39,6 +45,10 @@ async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTit
     // İşi yapan kişiye gönderilen e-posta
     message = "Merhaba " + taskPerson.full_name + ",<br/><br/>";
     message += `${taskCreator.full_name} tarafından, görevlisi olduğunuz bir talep oluşturuldu.<br/><br/>`;
+    message += `Başlık: ${taskTitle}<br/>`;
+    message += `Açıklama: ${taskDescription}<br/>`
+    message += `Görevli: ${taskPerson.full_name}<br/>`
+    message += `Oluşturulma Tarihi: ${getDateAndTime(new Date)}<br/><br/>`;
 
     sendEmail(subject, message, taskPerson.email);
 }
@@ -81,6 +91,10 @@ async function sendEmail(subject, message, toList) {
     } catch (error) {
         console.log(error);
     }
+}
+
+function getDateAndTime(date) {
+    return dayjs(date).format('DD/MM/YYYY HH:mm:ss')
 }
 
 module.exports = {
