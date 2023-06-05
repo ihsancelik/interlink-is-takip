@@ -6,11 +6,13 @@ const { sendNotification } = require('../services/notification-service')
 const dayjs = require('dayjs');
 
 async function sendReminderMail(taskManager, taskPerson, taskCreator, taskid, taskTitle) {
+    const curDate = getDateAndTime(new Date);
+
     // İş için daha önce kaç defa hatırlatma yapıldığını bul
     const reminderCount = TaskActivityLog.find({ task: taskid, action: taskActivityAction.REMINDER_SENT }).length;
 
     // Yöneticiye gönderilen e-posta
-    var subject = `${reminderCount}.Hatırlatma - ${taskTitle}`;
+    var subject = `${reminderCount}.Hatırlatma - ${taskTitle} - ${curDate}`;
     var message = "Merhaba " + taskManager.full_name + ",<br/><br/>";
     message += "Yöneticisi olduğunuz bir iş için " + taskCreator.full_name + " tarafından hatırlatma yapıldı.<br/><br/>";
 
@@ -27,8 +29,10 @@ async function sendReminderMail(taskManager, taskPerson, taskCreator, taskid, ta
 }
 
 async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTitle, taskDescription, taskProject) {
+    const curDate = getDateAndTime(new Date);
+
     // Yöneticiye gönderilen e-posta
-    var subject = `Yeni Talep - ${taskTitle}`;
+    var subject = `Yeni Talep - ${taskTitle} - ${curDate}`;
     var message = `Merhaba ${taskManager.full_name}, <br/><br/>`;
     message += `${taskCreator.full_name} tarafından, yöneticisi olduğunuz departman için bir talep oluşturuldu.<br/><br/>`;
 
@@ -36,7 +40,7 @@ async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTit
     message += `Başlık: ${taskTitle}<br/>`;
     message += `Açıklama: ${taskDescription}<br/>`
     message += `Görevli: ${taskPerson.full_name}<br/>`
-    message += `Oluşturulma Tarihi: ${getDateAndTime(new Date)}<br/><br/>`;
+    message += `Oluşturulma Tarihi: ${curDate}<br/><br/>`;
 
     sendEmail(subject, message, taskManager.email);
 
@@ -57,7 +61,9 @@ async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTit
 }
 
 async function sendConversationAddedMessageMail(taskPerson, conversationCreator, taskTitle) {
-    var subject = `Yeni Yorum - ${taskTitle}`;
+    const curDate = getDateAndTime(new Date);
+
+    var subject = `Yeni Yorum - ${taskTitle} - ${curDate}`;
     var message = "Merhaba " + taskPerson.full_name + ",<br/><br/>";
     message += `${conversationCreator.full_name} tarafından, görevlisi olduğunuz bir talebe yeni bir yorum eklendi.<br/><br/>`;
 
