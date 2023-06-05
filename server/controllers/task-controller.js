@@ -121,7 +121,7 @@ router.post('/tasks', [
         const taskManager = await getTaskManager(savedTask);
         const project = await Project.findById(related_project);
 
-        sendTaskCreatedMail(taskManager, related_person_user, created_from_user, savedTask.title, savedTask.description, project);
+        sendTaskCreatedMail(taskManager, related_person_user, created_from_user, savedTask.title, savedTask.description, project, savedTask._id);
 
         const user_id = req.auth.user_id;
         const user = await User.findById(user_id);

@@ -30,7 +30,7 @@ async function sendReminderMail(taskManager, taskPerson, taskCreator, taskid, ta
     await sendEmail(subject, message, taskPerson.email);
 }
 
-async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTitle, taskDescription, taskProject) {
+async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTitle, taskDescription, taskProject, taskId) {
     const curDate = getDateAndTime(new Date);
 
     // Yöneticiye gönderilen e-posta
@@ -43,7 +43,7 @@ async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTit
     message += `Açıklama: ${taskDescription}<br/>`
     message += `Görevli: ${taskPerson.full_name}<br/>`
     message += `Oluşturulma Tarihi: ${curDate}<br/><br/>`;
-    message += `Talebi görüntülemek için <a href="${getRoutingURL(taskProject._id)}">tıklayınız</a>.<br/><br/>`;
+    message += `Talebi görüntülemek için <a href="${getRoutingURL(taskId)}">tıklayınız</a>.<br/><br/>`;
 
     sendEmail(subject, message, taskManager.email);
 
@@ -59,7 +59,7 @@ async function sendTaskCreatedMail(taskManager, taskPerson, taskCreator, taskTit
     message += `Açıklama: ${taskDescription}<br/>`
     message += `Görevli: ${taskPerson.full_name}<br/>`
     message += `Oluşturulma Tarihi: ${getDateAndTime(new Date)}<br/><br/>`;
-    message += `Talebi görüntülemek için <a href="${getRoutingURL(taskProject._id)}">tıklayınız</a>.<br/><br/>`;
+    message += `Talebi görüntülemek için <a href="${getRoutingURL(taskId)}">tıklayınız</a>.<br/><br/>`;
 
     sendEmail(subject, message, taskPerson.email);
 }
