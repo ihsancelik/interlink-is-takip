@@ -158,7 +158,10 @@ export default {
                         for (let i = 0; i < files.length; i++) {
                             formData.append('files', files[i]);
                         }
-                        add_conversation({ taskId: createdTaskId, formData: formData });
+                        add_conversation({ taskId: createdTaskId, formData: formData })
+                        .then(() => {
+                            this.$refs.fileInput.files = null;
+                        });
                     }
                     $('#createEditTaskModal').modal('hide')
                 });

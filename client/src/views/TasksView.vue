@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <h1>Talepler</h1>
-    <button @click="createTask" class="btn btn-success">Talep Kaydet</button>
+    <button @click="createTask" class="btn btn-success">Talep Aç</button>
 
     <div class="row">
       <div class="col-md-3">

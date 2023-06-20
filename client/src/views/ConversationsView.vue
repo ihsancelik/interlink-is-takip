@@ -72,7 +72,7 @@
                     style="min-height: 250px; max-height: 300px;" />
                 <div class="row">
                     <div class="col-md-6">
-                        <input type="file" ref="fileInput" multiple />
+                        <input id="file_input" type="file" ref="fileInput" multiple />
                     </div>
                     <div class="col-md-6">
                         <button @click="save" class="btn btn-success">Gönder</button>
@@ -95,6 +95,11 @@ import dayjs from "dayjs"
 export default {
     methods: {
         save() {
+            // String is null or empty
+            if (!this.message || !this.message.trim()) {
+                return;
+            }
+
             const files = this.$refs.fileInput.files;
             const formData = new FormData();
             formData.append('message', this.message);
@@ -103,6 +108,8 @@ export default {
             }
             add_conversation({ taskId: this.taskId, formData: formData }).then(response => {
                 this.$store.dispatch("conversations", { taskId: this.taskId });
+                $("#file_input").val("");
+                this.message = ' ';
             });
         },
         changeTaskStatus() {
