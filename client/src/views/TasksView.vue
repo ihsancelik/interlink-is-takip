@@ -15,7 +15,7 @@
 
       <div class="col-md-3">
         <label>Proje</label><br />
-        <select id="projectSelect2" class="form-control mb-2 setselect2">
+        <select id="projectSelect2" class="form-control mb-2 setselect2" tabindex="1">
           <option value="0">
             <span>Tümü</span>
           </option>
@@ -100,15 +100,16 @@
     </table>
   </div>
 
-  <div class="modal fade" id="createEditTaskModal" tabindex="-1" role="dialog" aria-labelledby="createEditTaskModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
+  <div class="modal fade" id="createEditTaskModal" tabindex="1">
+    <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="createEditTaskModalLabel">Yeni Talep</h5>
         </div>
         <div class="modal-body">
-          <CreateEditTaskComponent :selectedTask="selectedTask"></CreateEditTaskComponent>
+          <div class="container">
+            <CreateEditTaskComponent :selectedTask="selectedTask"></CreateEditTaskComponent>
+          </div>
         </div>
       </div>
     </div>
@@ -134,6 +135,7 @@ export default {
       this.$store.dispatch("taskStatuses");
       this.$store.dispatch("taskPriorities");
       this.$store.dispatch("projects");
+      this.filter();
     }, 100);
 
 
@@ -144,6 +146,15 @@ export default {
 
       $(this).on("select2:open", function (e) {
         $(".select2-search__field").attr("placeholder", "Ara...");
+      });
+
+    });
+
+    $(".setdialogselect2").each(function () {
+      $(this).select2({
+        selectOnClose: true,
+        dropdownParent: $('#createEditTaskModal'),
+        width: '100%'
       });
 
     });
@@ -182,25 +193,18 @@ export default {
   watch: {
     getTasks() {
       this.$nextTick(function () {
-        //clear the dataTable
-        if ($.fn.DataTable.isDataTable('#task-table')) {
-          $('#task-table').DataTable().clear().destroy();
-        }
 
-        setTimeout(() => {
 
-          new DataTable('#task-table', {
-            responsive: true,
-            language: {
-              url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Turkish.json",
-            },
-            autoWidth: true,
-            destroy: true,
-            retrieve: true,
-            order: [[0, "desc"]],
-          })
-
-        }, 3000);
+        // this.dt = new DataTable('#task-table', {
+        //   responsive: true,
+        //   language: {
+        //     url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Turkish.json",
+        //   },
+        //   autoWidth: true,
+        //   destroy: true,
+        //   retrieve: true,
+        //   order: [[8, "asc"]],
+        // })
 
 
       });
@@ -212,10 +216,11 @@ export default {
       userid: JSON.parse(this.$store.state.user)._id,
       tasks: [],
       selectedTask: null,
-      statusFilter: "0",
+      statusFilter: "64747d8cc6c9ca0911697139",
       projectFilter: "0",
       priorityFilter: "0",
       typeFilter: "0",
+      dt: null,
     };
   },
   components: {
