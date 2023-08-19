@@ -23,15 +23,18 @@
 
         <div class="row" v-if="selectedTask === null">
             <div class="col-md-6">
-                <select v-model="related_project_id" class="form-select mb-2">
-                    <option selected value="-1">Proje Seçiniz</option>
-                    <option v-for="project in getProjects" :key="project._id" :value="project._id">
-                        {{ project.name }}
+                <label>Proje</label><br />
+                <select id="cetProjectSelect2" class="form-control mb-2 setselect2">
+                    <option value="0">
+                        <span>Tümü</span>
+                    </option>
+                    <option v-for="project in getProjects" :value="project._id">
+                        <span>{{ project.name }}</span>
                     </option>
                 </select>
             </div>
             <div class="col-md-6">
-                <select v-model="type_id" class="form-select mb-2">
+                <select v-model="type_id" class="form-control mb-2 setselect2">
                     <option selected value="-1">Talep Tipi Seçiniz</option>
                     <option v-for="type in getTaskTypes" :key="type._id" :value="type._id">
                         {{ type.name }}
@@ -110,15 +113,19 @@ export default {
         }
     },
     mounted() {
-        this.$store.dispatch("departments");
-        this.$store.dispatch("users");
-        this.$store.dispatch("taskTypes");
-        this.$store.dispatch("taskStatuses");
-        this.$store.dispatch("taskPriorities");
-        this.$store.dispatch("projects");
+        // $('#cetProjectSelect2').on('select2:select', (e) => {
+        //     this.related_project_id = e.params.data.id;
+        // });
     },
     computed: {
-        ...mapGetters(["getDepartments", "getUsers", "getTaskTypes", "getTaskStatuses", "getTaskPriorities", "getProjects"]),
+        ...mapGetters([
+            "getDepartments",
+            "getUsers",
+            "getTaskTypes",
+            "getTaskStatuses",
+            "getTaskPriorities",
+            "getProjects"
+        ]),
     },
     data() {
         return {
@@ -159,9 +166,9 @@ export default {
                             formData.append('files', files[i]);
                         }
                         add_conversation({ taskId: createdTaskId, formData: formData })
-                        .then(() => {
-                            this.$refs.fileInput.files = null;
-                        });
+                            .then(() => {
+                                this.$refs.fileInput.files = null;
+                            });
                     }
                     $('#createEditTaskModal').modal('hide')
                 });
