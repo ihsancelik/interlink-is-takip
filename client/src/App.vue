@@ -20,7 +20,7 @@ import { RouterLink, RouterView } from "vue-router";
       <a class="navbar-brand" href="/tasks">
         <span style="font-size: xx-large"><b>InterLink</b> Destek</span>
       </a>
-      <button v-if="loggedIn" class="btn btn-danger" @click="logout">Logout</button>
+      <button v-if="loggedIn" class="btn btn-danger" @click="logout">Çıkış Yap</button>
       <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item" v-for="link in links">
@@ -67,10 +67,6 @@ export default {
       this.initUI();
     },
     getTasks(tasks) {
-      tasks.forEach((task) => {
-        console.log(task.status.name);
-      });
-
       this.openTaskCount = tasks.filter(
         (s) => s.status.name !== "iptal edildi" && s.status.name !== "tamamlandı"
       ).length;

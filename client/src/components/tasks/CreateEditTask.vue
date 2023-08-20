@@ -1,9 +1,9 @@
 <template>
     <div class="container">
 
-        <div class="row" v-if="selectedTask === null">
+        <div class="row mb-3" v-if="selectedTask === null">
             <div class="col-md-6">
-                <select v-model="related_department_id" class="form-select mb-2" aria-label="Rol">
+                <select id="cetDepartmentSelect2" class="setdialogselect2" aria-label="Rol">
                     <option selected value="-1">Departman Seçiniz</option>
                     <option v-for="department in getDepartments" :key="department._id" :value="department._id">
                         {{ department.name }}
@@ -12,8 +12,8 @@
             </div>
 
             <div class="col-md-6">
-                <select v-model="related_person_id" class="form-select mb-2">
-                    <option selected value="-1">İlgili Kişi Seçiniz</option>
+                <select id="cetRelatedPersonSelect2" class="setdialogselect2">
+                    <option selected value="-1">Kişi Seçiniz</option>
                     <option v-for="user in getUsers" :key="user._id" :value="user._id">
                         {{ user.full_name }} - {{ user.department.name }} - {{ user.role.name }}
                     </option>
@@ -21,18 +21,19 @@
             </div>
         </div>
 
-        <div class="row" v-if="selectedTask === null">
+        <div class="row mb-3" v-if="selectedTask === null">
             <div class="col-md-6">
-                <select v-model="related_project_id" class="form-select mb-2">
+                <select id="cetProjectSelect2" class="setdialogselect2">
                     <option selected value="-1">Proje Seçiniz</option>
-                    <option v-for="project in getProjects" :key="project._id" :value="project._id">
-                        {{ project.name }}
+                    <option v-for="project in getProjects" :value="project._id">
+                        <span>{{ project.name }}</span>
                     </option>
                 </select>
             </div>
+
             <div class="col-md-6">
-                <select v-model="type_id" class="form-select mb-2">
-                    <option selected value="-1">Talep Tipi Seçiniz</option>
+                <select id="cetTaskTypeSelect2" class="setdialogselect2">
+                    <option selected value="-1">Tip Seçiniz</option>
                     <option v-for="type in getTaskTypes" :key="type._id" :value="type._id">
                         {{ type.name }}
                     </option>
@@ -40,10 +41,10 @@
             </div>
         </div>
 
-        <div class="row" v-if="selectedTask === null">
+        <div class="row mb-3" v-if="selectedTask === null">
             <div class="col-md-6">
-                <select v-model="status_id" class="form-select mb-2">
-                    <option selected value="-1">Durum Tipi Seçiniz</option>
+                <select id="cetTaskStatusSelect2" class="setdialogselect2">
+                    <option selected value="-1">Durum Seçiniz</option>
                     <option v-for="status in getTaskStatuses" :key="status._id" :value="status._id">
                         {{ status.name }}
                     </option>
@@ -51,7 +52,7 @@
             </div>
 
             <div class="col-md-6">
-                <select v-model="priority_id" class="form-select mb-2">
+                <select id="cetPrioritySelect2" class="setdialogselect2">
                     <option selected value="-1">Öncelik Tipi Seçiniz</option>
                     <option v-for="priority in getTaskPriorities" :key="priority._id" :value="priority._id">
                         {{ priority.name }}
@@ -110,15 +111,41 @@ export default {
         }
     },
     mounted() {
-        this.$store.dispatch("departments");
-        this.$store.dispatch("users");
-        this.$store.dispatch("taskTypes");
-        this.$store.dispatch("taskStatuses");
-        this.$store.dispatch("taskPriorities");
-        this.$store.dispatch("projects");
+        $('#cetProjectSelect2').on('select2:select', (e) => {
+            this.related_project_id = e.params.data.id;
+        });
+
+        $('#cetTaskTypeSelect2').on('select2:select', (e) => {
+            this.type_id = e.params.data.id;
+        });
+
+        $('#cetTaskStatusSelect2').on('select2:select', (e) => {
+            this.status_id = e.params.data.id;
+        });
+
+        $('#cetPrioritySelect2').on('select2:select', (e) => {
+            this.priority_id = e.params.data.id;
+        });
+
+        $('#cetRelatedPersonSelect2').on('select2:select', (e) => {
+            this.related_person_id = e.params.data.id;
+        });
+
+        $('#cetDepartmentSelect2').on('select2:select', (e) => {
+            this.related_department_id = e.params.data.id;
+        });
+
+
     },
     computed: {
-        ...mapGetters(["getDepartments", "getUsers", "getTaskTypes", "getTaskStatuses", "getTaskPriorities", "getProjects"]),
+        ...mapGetters([
+            "getDepartments",
+            "getUsers",
+            "getTaskTypes",
+            "getTaskStatuses",
+            "getTaskPriorities",
+            "getProjects"
+        ]),
     },
     data() {
         return {
@@ -159,9 +186,9 @@ export default {
                             formData.append('files', files[i]);
                         }
                         add_conversation({ taskId: createdTaskId, formData: formData })
-                        .then(() => {
-                            this.$refs.fileInput.files = null;
-                        });
+                            .then(() => {
+                                this.$refs.fileInput.files = null;
+                            });
                     }
                     $('#createEditTaskModal').modal('hide')
                 });
