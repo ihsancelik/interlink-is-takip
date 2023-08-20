@@ -7,7 +7,8 @@
                 <p>{{ this.department_manager_full_name }}</p>
 
                 İlgili Kişi:
-                <select v-model="related_person_id" class="form-select mb-2" @change="changeRelatedPerson">
+                <select v-model="related_person_id" class="form-select mb-2" @change="changeRelatedPerson"
+                    :disabled="hideEditableInputs">
                     <option selected value="-1">İlgili Kişi Seçiniz</option>
                     <option v-for="relatedPerson in getUsers" :key="relatedPerson._id" :value="relatedPerson._id">
                         {{ relatedPerson.full_name }} - {{ relatedPerson.department.name }} - {{ relatedPerson.role.name }}
@@ -15,7 +16,8 @@
                 </select>
 
                 Proje:
-                <select v-model="project_id" class="form-select mb-2" @change="changeProject">
+                <select v-model="project_id" class="form-select mb-2" @change="changeProject"
+                    :disabled="hideEditableInputs">
                     <option selected value="-1">Proje Seçiniz</option>
                     <option v-for="project in getProjects" :key="project._id" :value="project._id">
                         {{ project.name }}
@@ -23,7 +25,7 @@
                 </select>
 
                 Tip:
-                <select v-model="type_id" class="form-select mb-2" @change="changeTaskType">
+                <select v-model="type_id" class="form-select mb-2" @change="changeTaskType" :disabled="hideEditableInputs">
                     <option selected value="-1">Talep Tipi Seçiniz</option>
                     <option v-for="type in getTaskTypes" :key="type._id" :value="type._id">
                         {{ type.name }}
@@ -31,7 +33,8 @@
                 </select>
 
                 Öncelik:
-                <select v-model="priority_id" class="form-select mb-2" @change="changeTaskPriority">
+                <select v-model="priority_id" class="form-select mb-2" @change="changeTaskPriority"
+                    :disabled="hideEditableInputs">
                     <option selected value="-1">Öncelik Tipi Seçiniz</option>
                     <option v-for="priority in getTaskPriorities" :key="priority._id" :value="priority._id">
                         {{ priority.name }}
@@ -68,13 +71,15 @@
             <hr />
             {{ answerAreaTitle }}
             <div v-if="showAnswerArea">
-                <QuillEditorComponent theme="snow" toolbar="minimal" v-model:content="message" content-type="html"
-                    style="min-height: 250px; max-height: 300px;" />
+                <div class="mb-3">
+                    <QuillEditorComponent theme="snow" toolbar="minimal" v-model:content="message" content-type="html"
+                    style="min-height: 185px;" />
+                </div>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-11 col-sm-9">
                         <input id="file_input" type="file" ref="fileInput" multiple />
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-1 col-sm-3">
                         <button @click="save" class="btn btn-success">Gönder</button>
                     </div>
                 </div>
@@ -176,6 +181,11 @@ export default {
             this.department_id = this.task.related_department._id;
             this.related_person_id = this.task.related_person._id;
 
+            const currentUser = JSON.parse(this.$store.state.user)
+            if (currentUser._id === this.task.created_from._id) {
+                this.hideEditableInputs = false;
+            }
+
         })
     },
     computed: {
@@ -203,7 +213,9 @@ export default {
             taskConversations: [],
             message: "",
             showAnswerArea: false,
-            answerAreaTitle: ""
+            answerAreaTitle: "",
+
+            hideEditableInputs: true,
         }
     },
     components: {

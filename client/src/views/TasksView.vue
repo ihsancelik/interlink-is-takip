@@ -49,7 +49,7 @@
         <label>Durum</label><br />
         <select id="statusSelect2" class="form-control mb-2 setselect2">
           <option value="0">Tümü</option>
-          <option v-for="status in getTaskStatuses" :key="status._id" :value="status._id">
+          <option v-for="status in getTaskStatuses" :key="status._id" :value="status._id" :selected="status.name==='beklemede'">
             {{ status.name }}
           </option>
         </select>
@@ -135,8 +135,11 @@ export default {
       this.$store.dispatch("taskStatuses");
       this.$store.dispatch("taskPriorities");
       this.$store.dispatch("projects");
-      this.filter();
     }, 100);
+
+    setTimeout(() => {
+      this.filter();
+    }, 300);
 
 
     $(".setselect2").each(function () {
